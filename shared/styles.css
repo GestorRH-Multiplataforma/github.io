@@ -67,8 +67,8 @@ nav {
   color: var(--white); text-decoration: none;
 }
 .nav-logo-icon {
-  width: 34px; height: 34px; border-radius: 9px; overflow: hidden;
-  display: flex; align-items: center; justify-content: center;
+  width: 34px; height: 34px; border-radius: 9px;
+  display: flex; align-items: center; justify-content: center; flex-shrink: 0;
 }
 .nav-logo-icon img { width: 34px; height: 34px; display: block; border-radius: 9px; }
 .nav-badge {
@@ -79,6 +79,7 @@ nav {
 }
 .nav-links {
   display: flex; align-items: center; gap: 24px;
+  position: absolute; left: 50%; transform: translateX(-50%);
 }
 .nav-links a {
   font-size: 14px; font-weight: 500; color: rgba(255,255,255,0.65);
