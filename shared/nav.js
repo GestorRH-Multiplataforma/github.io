@@ -60,11 +60,32 @@
 
   /* Utilidades globales */
   window.GRH = window.GRH || {};
-  window.GRH.markdownToHtml = md => md
-    .replace(/^### (.+)$/gm,'<h3>$1</h3>').replace(/^## (.+)$/gm,'<h2>$1</h2>').replace(/^# (.+)$/gm,'<h1>$1</h1>')
-    .replace(/\*\*(.+?)\*\*/g,'<strong>$1</strong>').replace(/`([^`]+)`/g,'<code>$1</code>')
-    .replace(/^[-*] (.+)$/gm,'<li>$1</li>').replace(/(<li>.*<\/li>\n?)+/gs,m=>'<ul>'+m+'</ul>')
-    .replace(/\n\n/g,'<br/><br/>').replace(/\n/g,'<br/>');
+
+  /* Carga marked.js si no está disponible y luego convierte */
+  window.GRH.markdownToHtml = function (md) {
+    if (window.marked) {
+      return window.marked.parse(md);
+    }
+    /* Fallback básico mientras carga la librería */
+    return md
+      .replace(/^### (.+)$/gm,'<h3>$1</h3>').replace(/^## (.+)$/gm,'<h2>$1</h2>').replace(/^# (.+)$/gm,'<h1>$1</h1>')
+      .replace(/\*\*(.+?)\*\*/g,'<strong>$1</strong>').replace(/`([^`]+)`/g,'<code>$1</code>')
+      .replace(/^[-*] (.+)$/gm,'<li>$1</li>').replace(/(<li>.*<\/li>\n?)+/gs,m=>'<ul>'+m+'</ul>')
+      .replace(/\n\n/g,'<br/><br/>').replace(/\n/g,'<br/>');
+  };
+
+  /* Inyectar marked.js desde CDN */
+  const markedScript = document.createElement('script');
+  markedScript.src = 'https://cdnjs.cloudflare.com/ajax/libs/marked/9.1.6/marked.min.js';
+  markedScript.onload = () => {
+    window.marked.setOptions({ breaks: true, gfm: true });
+    /* Re-renderizar cualquier changelog que ya esté visible */
+    document.querySelectorAll('[data-markdown]').forEach(el => {
+      el.innerHTML = window.marked.parse(el.dataset.markdown);
+    });
+  };
+  document.head.appendChild(markedScript);
+
   window.GRH.detectPlatform = () => {
     const ua = navigator.userAgent.toLowerCase();
     if (/android/.test(ua)) return 'android';
@@ -73,4 +94,27 @@
     if (/win/.test(ua)) return 'windows';
     return null;
   };
+})();
+
+/* ── Estilos del contenido Markdown del changelog ──────────── */
+(function () {
+  const s = document.createElement('style');
+  s.textContent = `
+    .changelog-content h1,.changelog-content h2,.changelog-content h3{font-family:'Epilogue',sans-serif;color:#fff;margin:18px 0 8px;font-size:15px;font-weight:700;}
+    .changelog-content h2{font-size:14px;}
+    .changelog-content h3{font-size:13px;color:rgba(255,255,255,0.8);}
+    .changelog-content ul,.changelog-content ol{padding-left:20px;margin:8px 0;}
+    .changelog-content li{margin-bottom:6px;color:rgba(255,255,255,0.75);font-size:14px;line-height:1.6;}
+    .changelog-content p{margin:8px 0;color:rgba(255,255,255,0.75);font-size:14px;line-height:1.7;}
+    .changelog-content code{background:rgba(0,168,232,0.1);color:#00A8E8;padding:1px 6px;border-radius:4px;font-size:12px;}
+    .changelog-content pre{background:rgba(0,0,0,0.3);border-radius:8px;padding:12px;overflow-x:auto;margin:10px 0;}
+    .changelog-content pre code{background:none;color:rgba(255,255,255,0.8);font-size:12px;}
+    .changelog-content blockquote{border-left:3px solid rgba(0,168,232,0.4);margin:10px 0;padding:8px 16px;background:rgba(0,168,232,0.06);border-radius:0 8px 8px 0;}
+    .changelog-content blockquote p{color:rgba(255,255,255,0.6);margin:0;}
+    .changelog-content a{color:#00A8E8;text-decoration:none;}
+    .changelog-content a:hover{text-decoration:underline;}
+    .changelog-content strong{color:#fff;font-weight:700;}
+    .changelog-content hr{border:none;border-top:1px solid rgba(255,255,255,0.08);margin:16px 0;}
+  `;
+  document.head.appendChild(s);
 })();
