@@ -5,46 +5,66 @@
  * Añade data-page="android"|"escritorio"|"home" al <body>
  */
 (function () {
- 
+
   function logoSVG(size) {
-    const r   = Math.round(size * 0.22);
-    const ir  = Math.round(size * 0.15);
-    const pad = Math.round(size * 0.12);
-    const inner = size - pad * 2;
-    const cx  = size * 0.38;
-    const hcy = size * 0.33;
-    const hr  = size * 0.25;
-    const bodyT  = hcy + hr * 0.5;
-    const bodyW  = hr * 2.4;
-    const bodyBL = size * 0.88;
-    const lx  = size * 0.46;
-    const ly  = hcy - hr * 0.2;
-    const lw  = size * 0.43;
-    const lh  = size * 0.55;
-    const lr  = size * 0.08;
-    const llx = lx + size * 0.06;
-    const llw = lw - size * 0.12;
-    const llh = size * 0.06;
-    const llr = llh / 2;
-    const ll1y = ly + size * 0.12;
-    const ll2y = ll1y + size * 0.16;
-    const ll3y = ll2y + size * 0.16;
-    return `<svg xmlns="http://www.w3.org/2000/svg" width="${size}" height="${size}" viewBox="0 0 ${size} ${size}" role="img" aria-label="GestorRH logo">
-  <rect width="${size}" height="${size}" rx="${r}" fill="#1A365D" stroke="#00A8E8" stroke-width="${Math.max(0.6, size * 0.025)}"/>
-  <rect x="${pad}" y="${pad}" width="${inner}" height="${inner}" rx="${ir}" fill="#F0F6FC"/>
-  <circle cx="${cx}" cy="${hcy}" r="${hr}" fill="#00A8E8"/>
-  <path d="M${pad + size*0.01} ${bodyBL} Q${pad + size*0.01} ${bodyT} ${cx} ${bodyT} Q${cx + bodyW/2} ${bodyT} ${cx + bodyW/2} ${bodyBL} Z" fill="#00A8E8"/>
+    const s = size;
+    // Radios y padding proporcionales al tamaño
+    const rOuter  = Math.round(s * 0.24);   // radio esquinas blancas exteriores
+    const rFrame  = Math.round(s * 0.20);   // radio marco azul oscuro
+    const rInner  = Math.round(s * 0.15);   // radio área contenido
+    const frameP  = s * 0.075;              // padding marco sobre blanco
+    const innerP  = s * 0.145;             // padding contenido sobre marco
+
+    const fi = frameP;
+    const fw = s - fi * 2;
+    const ii = innerP;
+    const iw = s - ii * 2;
+
+    // Persona: cabeza
+    const pcx = s * 0.385;
+    const pcy = s * 0.355;
+    const pr  = s * 0.22;
+
+    // Persona: cuerpo (path de arco)
+    const bodyTop  = pcy + pr * 0.45;
+    const bodyBott = s * 0.89;
+    const bodyHalf = pr * 1.3;
+
+    // Panel lista
+    const lx = s * 0.46;
+    const ly = pcy - pr * 0.18;
+    const lw = s - lx - ii + s * 0.01;
+    const lh = s * 0.56;
+    const lr = s * 0.075;
+
+    // Líneas de lista
+    const llx  = lx + s * 0.055;
+    const llw  = lw - s * 0.11;
+    const llh  = s * 0.065;
+    const llr  = llh / 2;
+    const ll1y = ly + lh * 0.20;
+    const ll2y = ly + lh * 0.46;
+    const ll3y = ly + lh * 0.72;
+
+    const sw = Math.max(0.5, s * 0.022); // stroke-width borde cyan (no se usa ahora)
+
+    return `<svg xmlns="http://www.w3.org/2000/svg" width="${s}" height="${s}" viewBox="0 0 ${s} ${s}" role="img" aria-label="GestorRH logo">
+  <rect width="${s}" height="${s}" rx="${rOuter}" fill="#FFFFFF"/>
+  <rect x="${fi}" y="${fi}" width="${fw}" height="${fw}" rx="${rFrame}" fill="#1A365D"/>
+  <rect x="${ii}" y="${ii}" width="${iw}" height="${iw}" rx="${rInner}" fill="#F0F6FC"/>
+  <circle cx="${pcx}" cy="${pcy}" r="${pr}" fill="#00A8E8"/>
+  <path d="M${ii + 0.01} ${bodyBott} Q${ii + 0.01} ${bodyTop} ${pcx} ${bodyTop} Q${pcx + bodyHalf} ${bodyTop} ${pcx + bodyHalf} ${bodyBott} Z" fill="#00A8E8"/>
   <rect x="${lx}" y="${ly}" width="${lw}" height="${lh}" rx="${lr}" fill="#1A365D"/>
   <rect x="${llx}" y="${ll1y}" width="${llw}" height="${llh}" rx="${llr}" fill="#F0F6FC"/>
   <rect x="${llx}" y="${ll2y}" width="${llw}" height="${llh}" rx="${llr}" fill="#F0F6FC"/>
   <rect x="${llx}" y="${ll3y}" width="${llw}" height="${llh}" rx="${llr}" fill="#F0F6FC"/>
 </svg>`;
   }
- 
+
   const depth = window.location.pathname.split('/').filter(Boolean).length;
   const root  = depth <= 1 ? '' : '../';
   const page  = document.body.dataset.page || 'home';
- 
+
   document.body.insertAdjacentHTML('afterbegin', `
 <nav id="grh-nav">
   <a href="${root}index.html" class="nav-logo">
@@ -58,7 +78,7 @@
     <a href="${root}escritorio/index.html"  ${page==='escritorio' ?'class="active"':''}>Escritorio</a>
   </div>
 </nav>`);
- 
+
   document.body.insertAdjacentHTML('beforeend', `
 <footer>
   <div class="container">
@@ -79,14 +99,17 @@
     </div>
   </div>
 </footer>`);
- 
+
+  /* Scroll reveal */
   const obs = new IntersectionObserver(
     entries => entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('visible'); obs.unobserve(e.target); } }),
     { threshold: 0.1, rootMargin: '0px 0px -40px 0px' }
   );
   document.querySelectorAll('.reveal').forEach(el => obs.observe(el));
- 
+
+  /* Utilidades globales */
   window.GRH = window.GRH || {};
+
   window.GRH.detectPlatform = () => {
     const ua = navigator.userAgent.toLowerCase();
     if (/android/.test(ua)) return 'android';
@@ -96,7 +119,8 @@
     return null;
   };
 })();
- 
+
+/* ── Estilos del contenido Markdown del changelog ──────────── */
 (function () {
   const s = document.createElement('style');
   s.textContent = `
