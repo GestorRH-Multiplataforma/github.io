@@ -61,31 +61,6 @@
   /* Utilidades globales */
   window.GRH = window.GRH || {};
 
-  /* Carga marked.js si no está disponible y luego convierte */
-  window.GRH.markdownToHtml = function (md) {
-    if (window.marked) {
-      return window.marked.parse(md);
-    }
-    /* Fallback básico mientras carga la librería */
-    return md
-      .replace(/^### (.+)$/gm,'<h3>$1</h3>').replace(/^## (.+)$/gm,'<h2>$1</h2>').replace(/^# (.+)$/gm,'<h1>$1</h1>')
-      .replace(/\*\*(.+?)\*\*/g,'<strong>$1</strong>').replace(/`([^`]+)`/g,'<code>$1</code>')
-      .replace(/^[-*] (.+)$/gm,'<li>$1</li>').replace(/(<li>.*<\/li>\n?)+/gs,m=>'<ul>'+m+'</ul>')
-      .replace(/\n\n/g,'<br/><br/>').replace(/\n/g,'<br/>');
-  };
-
-  /* Inyectar marked.js desde CDN */
-  const markedScript = document.createElement('script');
-  markedScript.src = 'https://cdnjs.cloudflare.com/ajax/libs/marked/9.1.6/marked.min.js';
-  markedScript.onload = () => {
-    window.marked.setOptions({ breaks: true, gfm: true });
-    /* Re-renderizar cualquier changelog que ya esté visible */
-    document.querySelectorAll('[data-markdown]').forEach(el => {
-      el.innerHTML = window.marked.parse(el.dataset.markdown);
-    });
-  };
-  document.head.appendChild(markedScript);
-
   window.GRH.detectPlatform = () => {
     const ua = navigator.userAgent.toLowerCase();
     if (/android/.test(ua)) return 'android';
