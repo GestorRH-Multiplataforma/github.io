@@ -67,10 +67,10 @@ nav {
   color: var(--white); text-decoration: none;
 }
 .nav-logo-icon {
-  width: 34px; height: 34px; border-radius: 9px;
+  width: 34px; height: 34px;
   display: flex; align-items: center; justify-content: center; flex-shrink: 0;
 }
-.nav-logo-icon img { width: 34px; height: 34px; display: block; border-radius: 9px; }
+.nav-logo-icon img { width: 34px; height: 34px; display: block; }
 .nav-badge {
   font-family: 'Epilogue', sans-serif; font-size: 10px; font-weight: 700;
   background: rgba(0,168,232,0.15); color: var(--cyan);
@@ -318,7 +318,7 @@ section { padding: 100px 0; }
 footer { padding: 40px 0; border-top: 1px solid var(--border); display: flex; flex-direction: column; gap: 20px; }
 .footer-inner { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 16px; }
 .footer-brand { display: flex; align-items: center; gap: 10px; }
-.footer-brand-img { width: 28px; height: 28px; border-radius: 7px; overflow: hidden; flex-shrink: 0; }
+.footer-brand-img { width: 28px; height: 28px; flex-shrink: 0; }
 .footer-brand-img img { width: 28px; height: 28px; display: block; }
 .footer-brand-name { font-family: 'Epilogue', sans-serif; font-size: 16px; font-weight: 800; }
 .footer-links { display: flex; gap: 24px; flex-wrap: wrap; }
