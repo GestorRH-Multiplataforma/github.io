@@ -1,0 +1,424 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>GestorRH Android — App para empleados</title>
+  <meta name="description" content="App móvil nativa para empleados. Ficha con geolocalización, consulta tu cuadrante y gestiona tus ausencias desde cualquier lugar." />
+  <link rel="stylesheet" href="../shared/styles.css" />
+  <style>
+    /* ── HERO ANDROID ─────────────────────────────────────── */
+    .hero-content { position: relative; z-index: 1; display: grid; grid-template-columns: 1fr 1fr; gap: 60px; align-items: center; }
+    .hero-eyebrow { margin-bottom: 24px; }
+
+    /* Phone mockup */
+    .hero-visual { display: flex; justify-content: center; align-items: center; }
+    .phone-wrapper { position: relative; animation: float 4s ease-in-out infinite; }
+    .phone {
+      width: 220px; height: 440px; background: var(--surface);
+      border-radius: 36px; border: 2px solid rgba(0,168,232,0.25);
+      box-shadow: 0 40px 80px rgba(0,0,0,0.5), 0 0 0 1px rgba(255,255,255,0.05), inset 0 1px 0 rgba(255,255,255,0.1), var(--shadow-cyan);
+      overflow: hidden; position: relative;
+    }
+    .phone-notch { position: absolute; top: 14px; left: 50%; transform: translateX(-50%); width: 70px; height: 6px; background: rgba(0,0,0,0.5); border-radius: 100px; z-index: 10; }
+    .phone-screen { padding: 32px 16px 0; height: 100%; display: flex; flex-direction: column; }
+    .phone-bottom-nav {
+      margin-top: auto; display: flex; justify-content: space-around; align-items: center;
+      border-top: 1px solid rgba(255,255,255,0.08); padding: 8px 0 10px;
+      background: var(--surface); flex-shrink: 0;
+    }
+    .phone-nav-item { display: flex; flex-direction: column; align-items: center; gap: 3px; }
+    .phone-nav-item svg { width: 14px; height: 14px; }
+    .phone-nav-label { font-size: 7px; font-weight: 600; letter-spacing: 0.03em; }
+    .phone-status { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+    .phone-time { font-family: 'Epilogue', sans-serif; font-size: 12px; font-weight: 700; color: var(--white); }
+    .phone-glow {
+      position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+      width: 300px; height: 300px;
+      background: radial-gradient(circle, rgba(0,168,232,0.15), transparent 70%);
+      pointer-events: none; border-radius: 50%;
+    }
+    .phone-mini-cards { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+    .phone-mini-card { background: var(--surface-2); border-radius: 12px; padding: 10px; border: 1px solid rgba(255,255,255,0.06); }
+    .phone-mini-icon { width: 20px; height: 20px; background: rgba(0,168,232,0.15); border-radius: 6px; margin-bottom: 5px; display: flex; align-items: center; justify-content: center; }
+    .phone-mini-icon svg { width: 11px; height: 11px; fill: var(--cyan); }
+    .phone-mini-label { font-size: 8px; color: var(--text-muted); margin-bottom: 2px; }
+    .phone-mini-val { font-family: 'Epilogue', sans-serif; font-size: 10px; font-weight: 700; color: var(--white); }
+
+    /* ── INSTALL NOTES ────────────────────────────────────── */
+    .install-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+    .install-card {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: 20px; padding: 28px;
+    }
+    .install-platform {
+      display: flex; align-items: center; gap: 10px;
+      font-family: 'Epilogue', sans-serif; font-size: 16px; font-weight: 700;
+      margin-bottom: 16px;
+    }
+    .install-platform svg { width: 20px; height: 20px; fill: var(--cyan); }
+    .install-steps { list-style: none; display: flex; flex-direction: column; gap: 10px; }
+    .install-steps li { display: flex; gap: 10px; font-size: 14px; color: rgba(255,255,255,0.7); line-height: 1.5; }
+    .step-num {
+      width: 20px; height: 20px; border-radius: 50%; background: rgba(0,168,232,0.15);
+      border: 1px solid rgba(0,168,232,0.3); display: flex; align-items: center;
+      justify-content: center; font-size: 10px; font-weight: 700; color: var(--cyan);
+      flex-shrink: 0; margin-top: 1px;
+    }
+    .install-note {
+      margin-top: 14px; padding: 12px 16px; border-radius: 10px;
+      background: rgba(0,168,232,0.06); border: 1px solid rgba(0,168,232,0.15);
+      font-size: 12px; color: rgba(255,255,255,0.5); line-height: 1.6;
+    }
+    .install-note strong { color: rgba(255,255,255,0.75); }
+
+    @media (max-width: 900px) {
+      .hero-content { grid-template-columns: 1fr; gap: 48px; }
+      .hero-visual { order: -1; }
+      .install-grid { grid-template-columns: 1fr; }
+    }
+    @media (max-width: 600px) {
+      .phone { width: 180px; height: 360px; }
+    }
+  </style>
+</head>
+<body data-page="android">
+
+  <!-- HERO -->
+  <section class="hero">
+    <div class="hero-bg"></div>
+    <div class="hero-grid"></div>
+    <div class="container">
+      <div class="hero-content">
+        <div class="hero-text">
+          <div class="hero-eyebrow">
+            <span class="tag">Android · Rol Empleado</span>
+          </div>
+          <h1 class="hero-title">
+            Tu jornada laboral,<br /><span>en tu bolsillo</span>
+          </h1>
+          <p class="hero-subtitle">
+            Ficha con validación GPS, consulta tu cuadrante y gestiona tus ausencias desde cualquier lugar. Funciona aunque no tengas conexión.
+          </p>
+          <div class="hero-actions">
+            <button id="hero-download-btn" class="btn-primary">
+              <svg viewBox="0 0 24 24"><path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/></svg>
+              Descargar APK
+              <span class="version-badge" id="hero-version">...</span>
+            </button>
+            <button onclick="document.getElementById('funcionalidades').scrollIntoView({behavior:'smooth'})" class="btn-secondary">
+              <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 14.5v-9l6 4.5-6 4.5z"/></svg>
+              Ver funcionalidades
+            </button>
+          </div>
+          <div class="hero-stats">
+            <div><div class="hero-stat-value">v1.0+</div><div class="hero-stat-label">Versión estable</div></div>
+            <div><div class="hero-stat-value">Android 8+</div><div class="hero-stat-label">Compatibilidad</div></div>
+            <div><div class="hero-stat-value">ES / EN</div><div class="hero-stat-label">Idiomas</div></div>
+          </div>
+        </div>
+
+        <!-- Phone mockup -->
+        <div class="hero-visual">
+          <div class="phone-glow"></div>
+          <div class="phone-wrapper">
+            <div class="phone">
+              <div class="phone-notch"></div>
+              <div class="phone-screen">
+                <div class="phone-status">
+                  <span class="phone-time">08:48</span>
+                  <div style="display:flex;gap:5px;">
+                    <span style="width:14px;height:7px;background:rgba(255,255,255,0.6);border-radius:2px;display:inline-block;"></span>
+                    <span style="width:7px;height:7px;background:rgba(255,255,255,0.6);border-radius:50%;display:inline-block;"></span>
+                  </div>
+                </div>
+                <div style="margin-bottom:14px;">
+                  <div style="font-size:9px;color:var(--cyan);font-weight:700;letter-spacing:0.08em;text-transform:uppercase;margin-bottom:2px;">Miércoles, 29 de abril</div>
+                  <div style="font-family:'Epilogue',sans-serif;font-size:14px;font-weight:800;">¡Hola, Juan Pérez!</div>
+                </div>
+                <!-- Fichaje widget -->
+                <div style="background:rgba(0,168,232,0.12);border:1px solid rgba(0,168,232,0.25);border-radius:14px;padding:12px;margin-bottom:10px;text-align:center;">
+                  <div style="font-size:8px;color:var(--cyan);font-weight:700;letter-spacing:0.12em;text-transform:uppercase;margin-bottom:5px;">● TRABAJANDO</div>
+                  <div style="font-family:'Epilogue',sans-serif;font-size:20px;font-weight:800;letter-spacing:0.04em;margin-bottom:8px;line-height:1;">03:42:17</div>
+                  <div style="background:var(--error);color:var(--white);font-family:'Epilogue',sans-serif;font-size:8px;font-weight:800;padding:8px 10px;border-radius:9px;letter-spacing:0.1em;">FINALIZAR JORNADA</div>
+                </div>
+                <div class="phone-mini-cards" style="margin-bottom:10px;">
+                  <div class="phone-mini-card">
+                    <div class="phone-mini-icon"><svg viewBox="0 0 24 24"><path d="M11.99 2C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zM12 20c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8zm.5-13H11v6l5.25 3.15.75-1.23-4.5-2.67V7z"/></svg></div>
+                    <div class="phone-mini-label">Próximo turno</div>
+                    <div class="phone-mini-val" style="font-size:9px;">Sin turno asig.</div>
+                  </div>
+                  <div class="phone-mini-card">
+                    <div class="phone-mini-icon"><svg viewBox="0 0 24 24"><path d="M17 12h-5v5h5v-5zM16 1v2H8V1H6v2H5c-1.1 0-1.99.9-1.99 2L3 19c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2h-1V1h-2zm3 18H5V8h14v11z"/></svg></div>
+                    <div class="phone-mini-label">Próx. ausencia</div>
+                    <div class="phone-mini-val" style="font-size:9px;">Sin ausencias</div>
+                  </div>
+                </div>
+                <div style="background:var(--surface-2);border-radius:10px;padding:10px;border:1px solid rgba(255,255,255,0.06);">
+                  <div style="font-size:8px;color:rgba(255,255,255,0.4);font-weight:600;letter-spacing:0.06em;text-transform:uppercase;margin-bottom:6px;">Últimos fichajes</div>
+                  <div style="display:flex;justify-content:space-between;align-items:center;">
+                    <div>
+                      <div style="font-size:9px;color:var(--white);font-weight:600;">28/04/2026</div>
+                      <div style="font-size:8px;color:rgba(255,255,255,0.4);">Sin turno asignado</div>
+                    </div>
+                    <div style="display:flex;align-items:center;gap:6px;">
+                      <div style="text-align:center;"><div style="font-size:7px;color:rgba(255,255,255,0.4);">Entrada</div><div style="font-family:'Epilogue',sans-serif;font-size:10px;font-weight:700;">08:48</div></div>
+                      <svg viewBox="0 0 24 24" style="width:8px;height:8px;fill:rgba(255,255,255,0.3);"><path d="M12 4l-1.41 1.41L16.17 11H4v2h12.17l-5.58 5.59L12 20l8-8z"/></svg>
+                      <div style="text-align:center;"><div style="font-size:7px;color:rgba(255,255,255,0.4);">Salida</div><div style="font-family:'Epilogue',sans-serif;font-size:10px;font-weight:700;">17:05</div></div>
+                    </div>
+                  </div>
+                </div>
+                <div class="phone-bottom-nav">
+                  <div class="phone-nav-item"><svg viewBox="0 0 24 24" style="fill:var(--cyan);"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg><span class="phone-nav-label" style="color:var(--cyan);">Inicio</span></div>
+                  <div class="phone-nav-item"><svg viewBox="0 0 24 24" style="fill:rgba(255,255,255,0.35);"><path d="M19 3h-1V1h-2v2H8V1H6v2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V8h14v11z"/></svg><span class="phone-nav-label" style="color:rgba(255,255,255,0.35);">Turnos</span></div>
+                  <div class="phone-nav-item"><svg viewBox="0 0 24 24" style="fill:rgba(255,255,255,0.35);"><path d="M17 12h-5v5h5v-5zM16 1v2H8V1H6v2H5c-1.1 0-1.99.9-1.99 2L3 19c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2h-1V1h-2zm3 18H5V8h14v11z"/></svg><span class="phone-nav-label" style="color:rgba(255,255,255,0.35);">Ausencias</span></div>
+                  <div class="phone-nav-item"><svg viewBox="0 0 24 24" style="fill:rgba(255,255,255,0.35);"><path d="M12 12c2.7 0 4.8-2.1 4.8-4.8S14.7 2.4 12 2.4 7.2 4.5 7.2 7.2 9.3 12 12 12zm0 2.4c-3.2 0-9.6 1.6-9.6 4.8v2.4h19.2v-2.4c0-3.2-6.4-4.8-9.6-4.8z"/></svg><span class="phone-nav-label" style="color:rgba(255,255,255,0.35);">Perfil</span></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- FUNCIONALIDADES -->
+  <section id="funcionalidades">
+    <div class="container">
+      <div class="section-header reveal">
+        <span class="tag">Funcionalidades</span>
+        <h2 class="section-title">Todo lo que necesitas<br/>para gestionar tu jornada</h2>
+        <p class="section-subtitle">Diseñada para el empleado moderno, con todas las herramientas de control de presencia en un solo lugar.</p>
+      </div>
+      <div class="features-grid">
+        <div class="feature-card reveal">
+          <div class="feature-icon"><svg viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg></div>
+          <h3 class="feature-title">Fichaje con geovallado</h3>
+          <p class="feature-desc">Valida tu ubicación GPS antes de registrar entrada o salida. El sistema comprueba que estás dentro del radio configurado por la empresa.</p>
+        </div>
+        <div class="feature-card reveal reveal-delay-1">
+          <div class="feature-icon"><svg viewBox="0 0 24 24"><path d="M1 9l2 2c4.97-4.97 13.03-4.97 18 0l2-2C16.93 2.93 7.08 2.93 1 9zm8 8l3 3 3-3c-1.65-1.66-4.34-1.66-6 0zm-4-4l2 2c2.76-2.76 7.24-2.76 10 0l2-2C15.14 9.14 8.87 9.14 5 13z"/></svg></div>
+          <h3 class="feature-title">Modo offline</h3>
+          <p class="feature-desc">Sin conexión no es un problema. Los fichajes se guardan localmente y se sincronizan automáticamente en cuanto el dispositivo recupera la red.</p>
+        </div>
+        <div class="feature-card reveal reveal-delay-2">
+          <div class="feature-icon"><svg viewBox="0 0 24 24"><path d="M19 3h-1V1h-2v2H8V1H6v2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V8h14v11zM7 10h5v5H7z"/></svg></div>
+          <h3 class="feature-title">Cuadrante de turnos</h3>
+          <p class="feature-desc">Consulta tus turnos asignados en vista lista o calendario. Los datos se cachean en el dispositivo para acceso instantáneo sin conexión.</p>
+        </div>
+        <div class="feature-card reveal">
+          <div class="feature-icon"><svg viewBox="0 0 24 24"><path d="M17 12h-5v5h5v-5zM16 1v2H8V1H6v2H5c-1.1 0-1.99.9-1.99 2L3 19c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2h-1V1h-2zm3 18H5V8h14v11z"/></svg></div>
+          <h3 class="feature-title">Gestión de ausencias</h3>
+          <p class="feature-desc">Solicita vacaciones, permisos o bajas médicas. Adjunta justificantes desde la cámara o el almacenamiento del dispositivo.</p>
+        </div>
+        <div class="feature-card reveal reveal-delay-1">
+          <div class="feature-icon"><svg viewBox="0 0 24 24"><path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4zm0 10.99h7c-.53 4.12-3.28 7.79-7 8.94V12H5V6.3l7-3.11v8.8z"/></svg></div>
+          <h3 class="feature-title">Seguridad JWT</h3>
+          <p class="feature-desc">Autenticación stateless con tokens cifrados en el Keystore nativo de Android. Cierre de sesión automático ante cualquier anomalía de seguridad.</p>
+        </div>
+        <div class="feature-card reveal reveal-delay-2">
+          <div class="feature-icon"><svg viewBox="0 0 24 24"><path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2z"/></svg></div>
+          <h3 class="feature-title">Historial completo</h3>
+          <p class="feature-desc">Revisa tu historial de fichajes con filtro por fechas. Consulta horas de entrada, salida y el estado de tus solicitudes en tiempo real.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- WHY -->
+  <section class="why-section">
+    <div class="container">
+      <div class="why-grid">
+        <div class="why-visual reveal">
+          <div class="why-card"><div class="why-card-icon"><svg viewBox="0 0 24 24"><path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4z"/></svg></div><div><div class="why-card-title">Cifrado AES-256</div><div class="why-card-desc">Credenciales y tokens en el Keystore nativo de Android. Tus datos nunca viajan en texto plano.</div></div></div>
+          <div class="why-card"><div class="why-card-icon"><svg viewBox="0 0 24 24"><path d="M1 9l2 2c4.97-4.97 13.03-4.97 18 0l2-2C16.93 2.93 7.08 2.93 1 9zm8 8l3 3 3-3c-1.65-1.66-4.34-1.66-6 0zm-4-4l2 2c2.76-2.76 7.24-2.76 10 0l2-2C15.14 9.14 8.87 9.14 5 13z"/></svg></div><div><div class="why-card-title">Sincronización automática</div><div class="why-card-desc">WorkManager gestiona la cola de fichajes pendientes y los reenvía en cuanto hay conexión disponible.</div></div></div>
+          <div class="why-card"><div class="why-card-icon"><svg viewBox="0 0 24 24"><path d="M17 1.01L7 1c-1.1 0-1.99.9-1.99 2v18c0 1.1.89 2 1.99 2h10c1.1 0 2-.9 2-2V3c0-1.1-.9-1.99-2-1.99zM17 19H7V5h10v14z"/></svg></div><div><div class="why-card-title">Clean Architecture + MVVM</div><div class="why-card-desc">Kotlin + Jetpack Compose. Código mantenible, testeable y preparado para escalar al rol Supervisor.</div></div></div>
+          <div class="why-card"><div class="why-card-icon"><svg viewBox="0 0 24 24"><path d="M11.99 2C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zm4.24 16L12 15.45 7.77 18l1.12-4.81-3.73-3.23 4.92-.42L12 5l1.92 4.53 4.92.42-3.73 3.23L16.23 18z"/></svg></div><div><div class="why-card-title">CI/CD con GitHub Actions</div><div class="why-card-desc">Pipeline automatizado que compila, testea y valida cada release antes de publicarla.</div></div></div>
+        </div>
+        <div class="why-content reveal reveal-delay-2">
+          <div class="section-header" style="text-align:left;">
+            <span class="tag">Por qué GestorRH Android</span>
+            <h2 class="section-title">Construida para entornos reales</h2>
+            <p class="section-subtitle" style="margin:0;text-align:left;">Cada decisión técnica responde a las necesidades reales del empleado en su puesto de trabajo.</p>
+          </div>
+          <div class="why-list">
+            <div class="why-item"><div class="why-check"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"></polyline></svg></div><div class="why-item-text"><strong>Funciona sin internet</strong><span>Los fichajes y el cuadrante están disponibles aunque pierdas la conexión.</span></div></div>
+            <div class="why-item"><div class="why-check"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"></polyline></svg></div><div class="why-item-text"><strong>Modo oscuro nativo</strong><span>Se adapta automáticamente al tema del sistema. Cómoda en cualquier condición de luz.</span></div></div>
+            <div class="why-item"><div class="why-check"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"></polyline></svg></div><div class="why-item-text"><strong>Bilingüe desde el primer día</strong><span>Interfaz completa en castellano e inglés. Lista para equipos internacionales.</span></div></div>
+            <div class="why-item"><div class="why-check"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"></polyline></svg></div><div class="why-item-text"><strong>APK optimizada</strong><span>ProGuard/R8 activado en release. Código ofuscado y APK reducida.</span></div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- REQUISITOS -->
+  <section>
+    <div class="container">
+      <div class="section-header reveal">
+        <span class="tag">Requisitos</span>
+        <h2 class="section-title">Compatibilidad</h2>
+        <p class="section-subtitle">GestorRH Android está optimizada para dispositivos modernos.</p>
+      </div>
+      <div class="req-grid reveal">
+        <div class="req-card"><div class="req-icon"><svg viewBox="0 0 24 24" style="width:28px;height:28px;fill:var(--cyan);"><path d="M17 1.01L7 1c-1.1 0-1.99.9-1.99 2v18c0 1.1.89 2 1.99 2h10c1.1 0 2-.9 2-2V3c0-1.1-.9-1.99-2-1.99z"/></svg></div><div class="req-label">Android mínimo</div><div class="req-value">Android 8.0<br/><small style="font-size:11px;color:var(--text-muted)">(API 27)</small></div></div>
+        <div class="req-card"><div class="req-icon"><svg viewBox="0 0 24 24" style="width:28px;height:28px;fill:var(--cyan);"><path d="M1 9l2 2c4.97-4.97 13.03-4.97 18 0l2-2C16.93 2.93 7.08 2.93 1 9zm8 8l3 3 3-3c-1.65-1.66-4.34-1.66-6 0zm-4-4l2 2c2.76-2.76 7.24-2.76 10 0l2-2C15.14 9.14 8.87 9.14 5 13z"/></svg></div><div class="req-label">Conexión</div><div class="req-value">Opcional<br/><small style="font-size:11px;color:var(--text-muted)">Modo offline</small></div></div>
+        <div class="req-card"><div class="req-icon"><svg viewBox="0 0 24 24" style="width:28px;height:28px;fill:var(--cyan);"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg></div><div class="req-label">Permisos</div><div class="req-value">Ubicación<br/><small style="font-size:11px;color:var(--text-muted)">GPS para fichaje</small></div></div>
+        <div class="req-card"><div class="req-icon"><svg viewBox="0 0 24 24" style="width:28px;height:28px;fill:var(--cyan);"><path d="M11.99 2C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zm6.93 6h-2.95c-.32-1.25-.78-2.45-1.38-3.56 1.84.63 3.37 1.91 4.33 3.56zM12 4.04c.83 1.2 1.48 2.53 1.91 3.96h-3.82c.43-1.43 1.08-2.76 1.91-3.96zM4.26 14C4.1 13.36 4 12.69 4 12s.1-1.36.26-2h3.38c-.08.66-.14 1.32-.14 2s.06 1.34.14 2H4.26zm.82 2h2.95c.32 1.25.78 2.45 1.38 3.56-1.84-.63-3.37-1.9-4.33-3.56zm2.95-8H5.08c.96-1.66 2.49-2.93 4.33-3.56C8.81 5.55 8.35 6.75 8.03 8zM12 19.96c-.83-1.2-1.48-2.53-1.91-3.96h3.82c-.43 1.43-1.08 2.76-1.91 3.96zM14.34 14H9.66c-.09-.66-.16-1.32-.16-2s.07-1.35.16-2h4.68c.09.65.16 1.32.16 2s-.07 1.34-.16 2zm.25 5.56c.6-1.11 1.06-2.31 1.38-3.56h2.95c-.96 1.65-2.49 2.93-4.33 3.56zM16.36 14c.08-.66.14-1.32.14-2s-.06-1.34-.14-2h3.38c.16.64.26 1.31.26 2s-.1 1.36-.26 2h-3.38z"/></svg></div><div class="req-label">Idiomas</div><div class="req-value">ES / EN<br/><small style="font-size:11px;color:var(--text-muted)">Según sistema</small></div></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- INSTALACIÓN -->
+  <section id="instalacion">
+    <div class="container">
+      <div class="section-header reveal">
+        <span class="tag">Instalación</span>
+        <h2 class="section-title">Cómo instalar la APK</h2>
+        <p class="section-subtitle">Al no estar en Google Play, necesitas habilitar la instalación desde fuentes externas. Es un proceso de un minuto.</p>
+      </div>
+      <div class="install-grid reveal">
+        <div class="install-card">
+          <div class="install-platform">
+            <svg viewBox="0 0 24 24"><path d="M6 18c0 .55.45 1 1 1h1v3.5c0 .83.67 1.5 1.5 1.5s1.5-.67 1.5-1.5V19h2v3.5c0 .83.67 1.5 1.5 1.5s1.5-.67 1.5-1.5V19h1c.55 0 1-.45 1-1V8H6v10zM3.5 8C2.67 8 2 8.67 2 9.5v7c0 .83.67 1.5 1.5 1.5S5 17.33 5 16.5v-7C5 8.67 4.33 8 3.5 8zm17 0c-.83 0-1.5.67-1.5 1.5v7c0 .83.67 1.5 1.5 1.5s1.5-.67 1.5-1.5v-7c0-.83-.67-1.5-1.5-1.5zm-4.97-5.84l1.3-1.3c.2-.2.2-.51 0-.71-.2-.2-.51-.2-.71 0l-1.48 1.48C13.85 1.23 12.95 1 12 1c-.96 0-1.86.23-2.66.63L7.85.15c-.2-.2-.51-.2-.71 0-.2.2-.2.51 0 .71l1.31 1.31C7.08 3.34 6 5.05 6 7h12c0-1.95-1.08-3.66-2.47-4.84zM10 5H9V4h1v1zm5 0h-1V4h1v1z"/></svg>
+            Android 8 – 11
+          </div>
+          <ol class="install-steps">
+            <li><div class="step-num">1</div><span>Ve a <strong>Ajustes → Seguridad</strong> y activa <strong>Fuentes desconocidas</strong>.</span></li>
+            <li><div class="step-num">2</div><span>Descarga el archivo <code>.apk</code> con el botón de arriba.</span></li>
+            <li><div class="step-num">3</div><span>Abre el archivo desde el gestor de archivos o la barra de notificaciones.</span></li>
+            <li><div class="step-num">4</div><span>Pulsa <strong>Instalar</strong> y espera a que termine.</span></li>
+          </ol>
+        </div>
+        <div class="install-card">
+          <div class="install-platform">
+            <svg viewBox="0 0 24 24"><path d="M6 18c0 .55.45 1 1 1h1v3.5c0 .83.67 1.5 1.5 1.5s1.5-.67 1.5-1.5V19h2v3.5c0 .83.67 1.5 1.5 1.5s1.5-.67 1.5-1.5V19h1c.55 0 1-.45 1-1V8H6v10zM3.5 8C2.67 8 2 8.67 2 9.5v7c0 .83.67 1.5 1.5 1.5S5 17.33 5 16.5v-7C5 8.67 4.33 8 3.5 8zm17 0c-.83 0-1.5.67-1.5 1.5v7c0 .83.67 1.5 1.5 1.5s1.5-.67 1.5-1.5v-7c0-.83-.67-1.5-1.5-1.5zm-4.97-5.84l1.3-1.3c.2-.2.2-.51 0-.71-.2-.2-.51-.2-.71 0l-1.48 1.48C13.85 1.23 12.95 1 12 1c-.96 0-1.86.23-2.66.63L7.85.15c-.2-.2-.51-.2-.71 0-.2.2-.2.51 0 .71l1.31 1.31C7.08 3.34 6 5.05 6 7h12c0-1.95-1.08-3.66-2.47-4.84zM10 5H9V4h1v1zm5 0h-1V4h1v1z"/></svg>
+            Android 12+
+          </div>
+          <ol class="install-steps">
+            <li><div class="step-num">1</div><span>Ve a <strong>Ajustes → Aplicaciones</strong> y selecciona tu navegador o gestor de archivos.</span></li>
+            <li><div class="step-num">2</div><span>Activa <strong>Instalar aplicaciones desconocidas</strong> para esa app.</span></li>
+            <li><div class="step-num">3</div><span>Descarga el archivo <code>.apk</code> con el botón de arriba.</span></li>
+            <li><div class="step-num">4</div><span>Abre el archivo y pulsa <strong>Instalar</strong>.</span></li>
+          </ol>
+          <div class="install-note">Puedes revocar el permiso después de instalar. Solo se necesita una vez.</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- DESCARGA CTA -->
+  <section class="download-section" id="descarga">
+    <div class="container">
+      <div class="download-inner reveal">
+        <span class="tag">Descarga gratuita</span>
+        <h2 class="download-title">Empieza hoy.<br/><span>Sin complicaciones.</span></h2>
+        <p class="download-subtitle">Descarga la última versión estable y empieza a gestionar tu jornada en minutos.</p>
+        <div class="download-actions">
+          <button id="main-download-btn" class="btn-primary" style="font-size:17px;padding:20px 36px;">
+            <svg viewBox="0 0 24 24"><path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/></svg>
+            Descargar APK
+            <span class="version-badge" id="main-version">...</span>
+          </button>
+          <div class="download-note">
+            <strong>¿Primera vez?</strong> Necesitas habilitar la instalación desde fuentes externas. Consulta la <a href="#instalacion" style="color:var(--cyan);">guía de instalación</a> más arriba.
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CHANGELOG (colapsable) -->
+  <section id="novedades">
+    <div class="container">
+      <div class="section-header reveal">
+        <span class="tag">Novedades</span>
+        <h2 class="section-title">Últimas actualizaciones</h2>
+      </div>
+      <div class="changelog-accordion reveal">
+        <button class="changelog-toggle" id="cl-toggle" onclick="toggleChangelog()">
+          <div class="changelog-toggle-info">
+            <span id="cl-toggle-label">Cargando versión...</span>
+            <span class="changelog-stable" id="cl-badge-toggle">STABLE</span>
+          </div>
+          <svg class="changelog-toggle-arrow" viewBox="0 0 24 24"><path d="M7 10l5 5 5-5z"/></svg>
+        </button>
+        <div class="changelog-panel" id="cl-panel">
+          <div class="changelog-card">
+            <div class="changelog-header">
+              <div class="changelog-title-row">
+                <span class="changelog-version" id="cl-version">Cargando…</span>
+                <span class="changelog-stable" id="cl-badge">STABLE</span>
+              </div>
+              <span class="changelog-date" id="cl-date"></span>
+            </div>
+            <div class="changelog-body">
+              <div class="changelog-content" id="cl-body">
+                <div class="changelog-loading">Cargando novedades<span class="changelog-dot">.</span><span class="changelog-dot" style="animation-delay:.3s">.</span><span class="changelog-dot" style="animation-delay:.6s">.</span></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <script src="../shared/nav.js"></script>
+  <script>
+    let apkDownloadUrl = '';
+    let apkFileName = 'GestorRH.apk';
+
+    async function triggerDownload() {
+      if (!apkDownloadUrl) return;
+      document.querySelectorAll('#hero-download-btn, #main-download-btn').forEach(b => { b.style.opacity='0.7'; b.style.pointerEvents='none'; });
+      try {
+        const r = await fetch(apkDownloadUrl);
+        if (!r.ok) throw new Error();
+        const blob = await r.blob();
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a'); a.href = url; a.download = apkFileName;
+        document.body.appendChild(a); a.click(); document.body.removeChild(a);
+        setTimeout(() => URL.revokeObjectURL(url), 5000);
+      } catch { window.open(apkDownloadUrl, '_blank'); }
+      finally { document.querySelectorAll('#hero-download-btn, #main-download-btn').forEach(b => { b.style.opacity=''; b.style.pointerEvents=''; }); }
+    }
+
+    function toggleChangelog() {
+      const toggle = document.getElementById('cl-toggle');
+      const panel  = document.getElementById('cl-panel');
+      toggle.classList.toggle('open');
+      panel.classList.toggle('open');
+    }
+
+    async function loadRelease() {
+      try {
+        const res  = await fetch('https://api.github.com/repos/GestorRH-Multiplataforma/gestorrh-android/releases/latest');
+        if (!res.ok) throw new Error();
+        const data = await res.json();
+        const version = data.tag_name || 'v1.0.1';
+        const date    = data.published_at ? new Date(data.published_at).toLocaleDateString('es-ES', { year:'numeric', month:'long', day:'numeric' }) : '';
+        const apk     = data.assets?.find(a => a.name.endsWith('.apk'));
+        apkDownloadUrl = apk?.browser_download_url || data.html_url;
+        apkFileName    = apk?.name || 'GestorRH.apk';
+        document.querySelectorAll('#hero-version, #main-version').forEach(el => el.textContent = version);
+        document.querySelectorAll('#hero-download-btn, #main-download-btn').forEach(btn => { btn.removeAttribute('href'); btn.style.cursor='pointer'; btn.onclick = e => { e.preventDefault(); triggerDownload(); }; });
+        document.getElementById('cl-version').textContent = version;
+        document.getElementById('cl-date').textContent    = date;
+        document.getElementById('cl-toggle-label').textContent = 'Novedades en ' + version;
+        if (!data.prerelease) { document.getElementById('cl-badge').style.display='inline-flex'; document.getElementById('cl-badge-toggle').style.display='inline-flex'; }
+        document.getElementById('cl-body').innerHTML = GRH.markdownToHtml(data.body || '_Sin notas disponibles._');
+        document.getElementById('grh-footer-version').textContent = 'Android ' + version;
+      } catch {
+        apkDownloadUrl = 'https://github.com/GestorRH-Multiplataforma/gestorrh-android/releases/latest';
+        document.querySelectorAll('#hero-version, #main-version').forEach(el => el.textContent = 'v1.0.1');
+        document.querySelectorAll('#hero-download-btn, #main-download-btn').forEach(btn => { btn.onclick = () => window.open(apkDownloadUrl, '_blank'); });
+        document.getElementById('cl-toggle-label').textContent = 'Novedades en v1.0.1';
+        document.getElementById('cl-badge').style.display = document.getElementById('cl-badge-toggle').style.display = 'inline-flex';
+        document.getElementById('cl-version').textContent = 'v1.0.1';
+        document.getElementById('cl-body').innerHTML = '<p>Corrección del endpoint de autenticación para producción.</p>';
+      }
+    }
+    loadRelease();
+  </script>
+</body>
+</html>
