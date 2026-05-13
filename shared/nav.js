@@ -16,7 +16,7 @@
 <nav id="grh-nav">
   <a href="${root}index.html" class="nav-logo">
     <div class="nav-logo-icon">
-      <img src="${LOGO_B64}" alt="GestorRH" width="34" height="34" style="border-radius:9px;display:block;" />
+      <img src="${LOGO_B64}" alt="GestorRH" width="34" height="34" style="display:block;" />
     </div>
     GestorRH
     <span class="nav-badge">Multiplataforma</span>
@@ -35,7 +35,7 @@
     <div class="footer-inner">
       <div class="footer-brand">
         <div class="footer-brand-img">
-          <img src="${LOGO_B64}" alt="GestorRH" width="28" height="28" style="border-radius:7px;display:block;" />
+          <img src="${LOGO_B64}" alt="GestorRH" width="28" height="28" style="display:block;" />
         </div>
         <span class="footer-brand-name">GestorRH</span>
       </div>
