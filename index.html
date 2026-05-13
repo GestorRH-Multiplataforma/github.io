@@ -53,7 +53,8 @@
     }
     .client-cta svg { width: 16px; height: 16px; fill: var(--cyan); transition: transform 0.2s; }
     .client-card:hover .client-cta svg { transform: translateX(4px); }
-    .client-version { font-size: 11px; font-weight: 400; color: var(--text-muted); }
+    .client-card-header { display: flex; align-items: center; gap: 16px; margin-bottom: 16px; }
+    .client-card-header .client-icon { margin: 0; flex-shrink: 0; }
 
     /* ── ARCHITECTURE VERTICAL ────────────────────────────── */
     .arch-section { background: var(--surface); border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); }
@@ -95,8 +96,8 @@
       position: relative; justify-self: center;
     }
     .arch-v-arrow-line::after {
-      content: '↓'; position: absolute; bottom: -4px; left: 50%;
-      transform: translateX(-50%); color: var(--cyan); font-size: 14px; line-height: 1;
+      content: '↕'; position: absolute; bottom: -6px; left: 50%;
+      transform: translateX(-50%); color: var(--cyan); font-size: 16px; line-height: 1;
     }
     .arch-v-arrow-label {
       font-size: 10px; color: var(--text-muted); white-space: nowrap;
@@ -168,11 +169,12 @@
         <div class="clients-grid">
           <a href="android/index.html" class="client-card android">
             <div>
-              <div class="client-icon android">
-                <!-- Android robot: antenas + cabeza + ojos -->
-                <svg viewBox="0 0 24 24"><path d="M17.6 9.48l1.84-3.18c.16-.31.04-.69-.26-.85a.637.637 0 0 0-.83.22l-1.88 3.24a11.463 11.463 0 0 0-8.46 0L6.09 5.67a.637.637 0 0 0-.83-.22c-.3.16-.42.54-.26.85L6.84 9.48A10.78 10.78 0 0 0 1 19h22a10.78 10.78 0 0 0-5.4-9.52zM7 15.25c-.69 0-1.25-.56-1.25-1.25S6.31 12.75 7 12.75s1.25.56 1.25 1.25S7.69 15.25 7 15.25zm10 0c-.69 0-1.25-.56-1.25-1.25s.56-1.25 1.25-1.25 1.25.56 1.25 1.25-.56 1.25-1.25 1.25z"/></svg>
+              <div class="client-card-header">
+                <div class="client-icon android">
+                  <svg viewBox="0 0 24 24"><path d="M17.6 9.48l1.84-3.18c.16-.31.04-.69-.26-.85a.637.637 0 0 0-.83.22l-1.88 3.24a11.463 11.463 0 0 0-8.46 0L6.09 5.67a.637.637 0 0 0-.83-.22c-.3.16-.42.54-.26.85L6.84 9.48A10.78 10.78 0 0 0 1 19h22a10.78 10.78 0 0 0-5.4-9.52zM7 15.25c-.69 0-1.25-.56-1.25-1.25S6.31 12.75 7 12.75s1.25.56 1.25 1.25S7.69 15.25 7 15.25zm10 0c-.69 0-1.25-.56-1.25-1.25s.56-1.25 1.25-1.25 1.25.56 1.25 1.25-.56 1.25-1.25 1.25z"/></svg>
+                </div>
+                <div><div class="client-label android">Para empleados</div><div class="client-title">Android</div></div>
               </div>
-              <div style="margin-top:16px;"><div class="client-label android">Para empleados</div><div class="client-title">Android</div></div>
               <p class="client-desc">Ficha con geovallado GPS, consulta tu cuadrante y gestiona ausencias. Funciona sin conexión gracias al modo offline.</p>
             </div>
             <div class="client-features">
@@ -200,11 +202,12 @@
 
           <a href="escritorio/index.html" class="client-card desktop">
             <div>
-              <div class="client-icon desktop">
-                <!-- Monitor con teclado -->
-                <svg viewBox="0 0 24 24"><path d="M20 18c1.1 0 1.99-.9 1.99-2L22 6c0-1.1-.9-2-2-2H4c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2H0v2h24v-2h-4zM4 6h16v10H4V6z"/></svg>
+              <div class="client-card-header">
+                <div class="client-icon desktop">
+                  <svg viewBox="0 0 24 24"><path d="M20 18c1.1 0 1.99-.9 1.99-2L22 6c0-1.1-.9-2-2-2H4c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2H0v2h24v-2h-4zM4 6h16v10H4V6z"/></svg>
+                </div>
+                <div><div class="client-label desktop">Para empresas</div><div class="client-title">Escritorio</div></div>
               </div>
-              <div style="margin-top:16px;"><div class="client-label desktop">Para empresas</div><div class="client-title">Escritorio</div></div>
               <p class="client-desc">Panel administrativo nativo para macOS y Windows. Gestiona tu equipo, planifica turnos y genera reportes PDF.</p>
             </div>
             <div class="client-features">
@@ -291,7 +294,6 @@
         <!-- Fila 4: flecha hacia DB -->
         <div class="arch-v-arrows-row">
           <div class="arch-v-arrow-col arch-v-arrow-col-single">
-            <div class="arch-v-arrow-line"></div>
             <div class="arch-v-arrow-line"></div>
           </div>
         </div>
