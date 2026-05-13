@@ -277,7 +277,7 @@ section { padding: 100px 0; }
 .changelog-toggle.open { border-bottom-left-radius: 0; border-bottom-right-radius: 0; border-color: rgba(0,168,232,0.3); }
 .changelog-toggle.open .changelog-toggle-arrow { transform: rotate(180deg); }
 .changelog-panel { max-height: 0; overflow: hidden; transition: max-height 0.4s ease; }
-.changelog-panel.open { max-height: 700px; }
+.changelog-panel.open { max-height: none; overflow: visible; }
 .changelog-panel .changelog-card { border-top-left-radius: 0; border-top-right-radius: 0; border-top: none; }
 
 /* ── REQUIREMENTS ─────────────────────────────────────────── */
