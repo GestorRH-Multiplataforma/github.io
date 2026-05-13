@@ -363,8 +363,12 @@
     </div>
   </section>
 
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/marked/9.1.6/marked.min.js"></script>
   <script src="../shared/nav.js"></script>
   <script>
+    marked.setOptions({ breaks: true, gfm: true });
+    function md(text) { return marked.parse(text || ''); }
+
     let apkDownloadUrl = '';
     let apkFileName = 'GestorRH.apk';
 
@@ -406,10 +410,9 @@
         document.getElementById('cl-date').textContent    = date;
         document.getElementById('cl-toggle-label').textContent = 'Novedades en ' + version;
         if (!data.prerelease) { document.getElementById('cl-badge').style.display='inline-flex'; document.getElementById('cl-badge-toggle').style.display='inline-flex'; }
-        const raw = data.body || '_Sin notas disponibles._';
+        const raw = data.body || '';
         const el = document.getElementById('cl-body');
-        el.dataset.markdown = raw;
-        el.innerHTML = GRH.markdownToHtml(raw);
+        el.innerHTML = raw ? md(raw) : '<p style="color:rgba(255,255,255,0.4)">Sin notas disponibles.</p>';
         document.getElementById('grh-footer-version').textContent = 'Android ' + version;
       } catch {
         apkDownloadUrl = 'https://github.com/GestorRH-Multiplataforma/gestorrh-android/releases/latest';
