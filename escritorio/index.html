@@ -1,0 +1,418 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>GestorRH Escritorio — Panel de administración</title>
+  <meta name="description" content="Panel administrativo para empresas. Gestiona empleados, turnos, ausencias y genera reportes desde macOS o Windows." />
+  <link rel="stylesheet" href="../shared/styles.css" />
+  <style>
+    /* ── HERO ESCRITORIO ──────────────────────────────────── */
+    .hero-content { position: relative; z-index: 1; display: grid; grid-template-columns: 1fr 1fr; gap: 60px; align-items: center; }
+    .hero-eyebrow { margin-bottom: 24px; }
+
+    /* Window mockup */
+    .hero-visual { display: flex; justify-content: center; align-items: center; }
+    .window-wrapper { width: 100%; max-width: 480px; animation: float 5s ease-in-out infinite; }
+    .window {
+      background: var(--surface); border-radius: 12px;
+      border: 1px solid rgba(0,168,232,0.2);
+      box-shadow: 0 40px 80px rgba(0,0,0,0.5), 0 0 0 1px rgba(255,255,255,0.04), var(--shadow-cyan);
+      overflow: hidden;
+    }
+    .window-bar {
+      background: var(--surface-2); padding: 10px 16px;
+      display: flex; align-items: center; gap: 10px;
+      border-bottom: 1px solid rgba(255,255,255,0.06);
+    }
+    .window-dots { display: flex; gap: 6px; }
+    .window-dot { width: 10px; height: 10px; border-radius: 50%; }
+    .wd-red   { background: #FF5F57; }
+    .wd-amber { background: #FFBD2E; }
+    .wd-green { background: #28C840; }
+    .window-title { font-size: 12px; color: rgba(255,255,255,0.4); font-weight: 500; margin: 0 auto; }
+    .window-body { display: flex; height: 300px; }
+
+    /* Sidebar */
+    .win-sidebar {
+      width: 52px; background: rgba(0,0,0,0.2);
+      border-right: 1px solid rgba(255,255,255,0.05);
+      display: flex; flex-direction: column; align-items: center;
+      padding: 12px 0; gap: 18px;
+    }
+    .win-sidebar-icon {
+      width: 32px; height: 32px; border-radius: 8px;
+      display: flex; align-items: center; justify-content: center;
+      cursor: pointer; transition: background 0.2s;
+    }
+    .win-sidebar-icon.active { background: rgba(0,168,232,0.2); }
+    .win-sidebar-icon svg { width: 16px; height: 16px; fill: rgba(255,255,255,0.4); }
+    .win-sidebar-icon.active svg { fill: var(--cyan); }
+
+    /* Main content area */
+    .win-main { flex: 1; padding: 16px; overflow: hidden; }
+    .win-header { font-family: 'Epilogue', sans-serif; font-size: 13px; font-weight: 700; margin-bottom: 12px; color: var(--white); }
+    .win-kpi-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 12px; }
+    .win-kpi { background: var(--surface-2); border-radius: 8px; padding: 10px; border: 1px solid rgba(255,255,255,0.05); }
+    .win-kpi-label { font-size: 8px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 3px; }
+    .win-kpi-value { font-family: 'Epilogue', sans-serif; font-size: 18px; font-weight: 800; color: var(--white); line-height: 1; }
+    .win-kpi-sub { font-size: 8px; color: var(--cyan); margin-top: 2px; }
+    .win-table-header { display: grid; grid-template-columns: 2fr 1fr 1fr 1fr; gap: 4px; padding: 4px 8px; font-size: 8px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.06em; }
+    .win-row { display: grid; grid-template-columns: 2fr 1fr 1fr 1fr; gap: 4px; padding: 6px 8px; background: var(--surface-2); border-radius: 6px; margin-bottom: 3px; align-items: center; }
+    .win-row-name { font-size: 10px; font-weight: 500; color: var(--white); }
+    .win-row-cell { font-size: 9px; color: rgba(255,255,255,0.5); }
+    .win-badge { font-size: 8px; padding: 2px 6px; border-radius: 100px; font-weight: 700; display: inline-block; }
+    .wb-ok      { background: rgba(46,125,50,0.2); color: #66BB6A; }
+    .wb-warn    { background: rgba(245,124,0,0.2); color: #FFA726; }
+    .wb-pending { background: rgba(0,168,232,0.15); color: var(--cyan); }
+
+    /* ── INSTALL SECTION ──────────────────────────────────── */
+    .install-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+    .install-card { background: var(--surface); border: 1px solid var(--border); border-radius: 20px; padding: 28px; }
+    .install-platform { display: flex; align-items: center; gap: 10px; font-family: 'Epilogue', sans-serif; font-size: 16px; font-weight: 700; margin-bottom: 16px; }
+    .install-platform svg { width: 20px; height: 20px; fill: var(--cyan); }
+    .install-steps { list-style: none; display: flex; flex-direction: column; gap: 10px; }
+    .install-steps li { display: flex; gap: 10px; font-size: 14px; color: rgba(255,255,255,0.7); line-height: 1.5; }
+    .step-num { width: 20px; height: 20px; border-radius: 50%; background: rgba(0,168,232,0.15); border: 1px solid rgba(0,168,232,0.3); display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: 700; color: var(--cyan); flex-shrink: 0; margin-top: 1px; }
+    .install-note { margin-top: 14px; padding: 12px 16px; border-radius: 10px; background: rgba(0,168,232,0.06); border: 1px solid rgba(0,168,232,0.15); font-size: 12px; color: rgba(255,255,255,0.5); line-height: 1.6; }
+    .install-note code { background: rgba(0,168,232,0.12); color: var(--cyan); padding: 1px 5px; border-radius: 4px; font-size: 11px; }
+
+    @media (max-width: 900px) {
+      .hero-content { grid-template-columns: 1fr; gap: 48px; }
+      .hero-visual { order: -1; }
+      .install-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body data-page="escritorio">
+
+  <!-- HERO -->
+  <section class="hero">
+    <div class="hero-bg"></div>
+    <div class="hero-grid"></div>
+    <div class="container">
+      <div class="hero-content">
+        <div class="hero-text">
+          <div class="hero-eyebrow">
+            <span class="tag">Escritorio · Rol Empresa</span>
+          </div>
+          <h1 class="hero-title">
+            Control total<br /><span>desde tu escritorio</span>
+          </h1>
+          <p class="hero-subtitle">
+            Panel administrativo nativo para macOS y Windows. Gestiona empleados, planifica turnos, valida ausencias y genera reportes PDF sin instalar Java.
+          </p>
+          <div class="hero-actions">
+            <div class="dl-buttons">
+              <button id="btn-macos" class="dl-btn" onclick="triggerDownload('macos')">
+                <svg viewBox="0 0 24 24"><path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.8-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z"/></svg>
+                <div class="dl-btn-info">
+                  <span class="dl-btn-label">Descargar para macOS</span>
+                  <span class="dl-version" id="ver-macos">...</span>
+                </div>
+              </button>
+              <button id="btn-windows" class="dl-btn" onclick="triggerDownload('windows')">
+                <svg viewBox="0 0 24 24"><path d="M3 12V6.75l6-1.32v6.57H3zm17 0V3l-8 1.43V12h8zM3 13h6v6.57l-6-1.32V13zm8 0h8v8L11 19.57V13z"/></svg>
+                <div class="dl-btn-info">
+                  <span class="dl-btn-label">Descargar para Windows</span>
+                  <span class="dl-version" id="ver-windows">...</span>
+                </div>
+              </button>
+            </div>
+            <a href="https://github.com/GestorRH-Multiplataforma/GestorRH-Escritorio/releases/latest" target="_blank" rel="noopener" class="btn-secondary">
+              <svg viewBox="0 0 24 24"><path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12"/></svg>
+              Ver releases en GitHub
+            </a>
+          </div>
+          <div class="hero-stats">
+            <div><div class="hero-stat-value">v1.0.0</div><div class="hero-stat-label">Versión estable</div></div>
+            <div><div class="hero-stat-value">macOS + Win</div><div class="hero-stat-label">Plataformas</div></div>
+            <div><div class="hero-stat-value">Sin JRE</div><div class="hero-stat-label">Instalador todo-en-uno</div></div>
+          </div>
+        </div>
+
+        <!-- Window mockup -->
+        <div class="hero-visual">
+          <div class="window-wrapper">
+            <div class="window">
+              <div class="window-bar">
+                <div class="window-dots">
+                  <div class="window-dot wd-red"></div>
+                  <div class="window-dot wd-amber"></div>
+                  <div class="window-dot wd-green"></div>
+                </div>
+                <span class="window-title">GestorRH — Dashboard</span>
+              </div>
+              <div class="window-body">
+                <!-- Sidebar icons -->
+                <div class="win-sidebar">
+                  <div class="win-sidebar-icon active"><svg viewBox="0 0 24 24"><path d="M3 13h8V3H3v10zm0 8h8v-6H3v6zm10 0h8V11h-8v10zm0-18v6h8V3h-8z"/></svg></div>
+                  <div class="win-sidebar-icon"><svg viewBox="0 0 24 24"><path d="M12 12c2.7 0 4.8-2.1 4.8-4.8S14.7 2.4 12 2.4 7.2 4.5 7.2 7.2 9.3 12 12 12zm0 2.4c-3.2 0-9.6 1.6-9.6 4.8v2.4h19.2v-2.4c0-3.2-6.4-4.8-9.6-4.8z"/></svg></div>
+                  <div class="win-sidebar-icon"><svg viewBox="0 0 24 24"><path d="M19 3h-1V1h-2v2H8V1H6v2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V8h14v11z"/></svg></div>
+                  <div class="win-sidebar-icon"><svg viewBox="0 0 24 24"><path d="M17 12h-5v5h5v-5zM16 1v2H8V1H6v2H5c-1.1 0-1.99.9-1.99 2L3 19c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2h-1V1h-2zm3 18H5V8h14v11z"/></svg></div>
+                  <div class="win-sidebar-icon"><svg viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-5 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z"/></svg></div>
+                </div>
+                <!-- Main panel -->
+                <div class="win-main">
+                  <div class="win-header">Dashboard · Hoy</div>
+                  <div class="win-kpi-grid">
+                    <div class="win-kpi"><div class="win-kpi-label">Empleados activos</div><div class="win-kpi-value">24</div><div class="win-kpi-sub">↑ 2 este mes</div></div>
+                    <div class="win-kpi"><div class="win-kpi-label">Turnos hoy</div><div class="win-kpi-value">18</div><div class="win-kpi-sub">6 tarde</div></div>
+                    <div class="win-kpi"><div class="win-kpi-label">Ausencias pend.</div><div class="win-kpi-value" style="color:#FFA726;">3</div><div class="win-kpi-sub">Por revisar</div></div>
+                  </div>
+                  <div class="win-table-header"><span>Empleado</span><span>Turno</span><span>Entrada</span><span>Estado</span></div>
+                  <div class="win-row"><span class="win-row-name">Ana García</span><span class="win-row-cell">Mañana</span><span class="win-row-cell">08:02</span><span><span class="win-badge wb-ok">Activo</span></span></div>
+                  <div class="win-row"><span class="win-row-name">Luis Martín</span><span class="win-row-cell">Mañana</span><span class="win-row-cell">08:15</span><span><span class="win-badge wb-warn">Retraso</span></span></div>
+                  <div class="win-row"><span class="win-row-name">Sara López</span><span class="win-row-cell">—</span><span class="win-row-cell">—</span><span><span class="win-badge wb-pending">Ausencia</span></span></div>
+                  <div class="win-row"><span class="win-row-name">Carlos Ruiz</span><span class="win-row-cell">Tarde</span><span class="win-row-cell">—</span><span><span class="win-badge wb-ok">Pendiente</span></span></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- FUNCIONALIDADES -->
+  <section id="funcionalidades">
+    <div class="container">
+      <div class="section-header reveal">
+        <span class="tag">Funcionalidades</span>
+        <h2 class="section-title">Gestión completa<br/>desde un solo panel</h2>
+        <p class="section-subtitle">Todas las herramientas que necesita tu empresa para gestionar personas, turnos y presencia.</p>
+      </div>
+      <div class="features-grid">
+        <div class="feature-card reveal">
+          <div class="feature-icon"><svg viewBox="0 0 24 24"><path d="M12 12c2.7 0 4.8-2.1 4.8-4.8S14.7 2.4 12 2.4 7.2 4.5 7.2 7.2 9.3 12 12 12zm0 2.4c-3.2 0-9.6 1.6-9.6 4.8v2.4h19.2v-2.4c0-3.2-6.4-4.8-9.6-4.8z"/></svg></div>
+          <h3 class="feature-title">Gestión de empleados</h3>
+          <p class="feature-desc">Directorio con paginación, búsqueda y filtros. Alta con contraseña generada automáticamente, baja programada, readmisión y restablecimiento de credenciales.</p>
+        </div>
+        <div class="feature-card reveal reveal-delay-1">
+          <div class="feature-icon"><svg viewBox="0 0 24 24"><path d="M19 3h-1V1h-2v2H8V1H6v2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V8h14v11z"/></svg></div>
+          <h3 class="feature-title">Planificación de turnos</h3>
+          <p class="feature-desc">Catálogo de turnos con CRUD completo, soporte de turnos nocturnos y asignación visual en calendario mensual con edición y registro de cambios.</p>
+        </div>
+        <div class="feature-card reveal reveal-delay-2">
+          <div class="feature-icon"><svg viewBox="0 0 24 24"><path d="M17 12h-5v5h5v-5zM16 1v2H8V1H6v2H5c-1.1 0-1.99.9-1.99 2L3 19c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2h-1V1h-2zm3 18H5V8h14v11z"/></svg></div>
+          <h3 class="feature-title">Gestión de ausencias</h3>
+          <p class="feature-desc">Bandeja de revisión con pestañas por estado. Aprueba o rechaza con observaciones y descarga los justificantes adjuntados por el empleado.</p>
+        </div>
+        <div class="feature-card reveal">
+          <div class="feature-icon"><svg viewBox="0 0 24 24"><path d="M5 9.2h3V19H5zM10.6 5h2.8v14h-2.8zm5.6 8H19v6h-2.8z"/></svg></div>
+          <h3 class="feature-title">Dashboard y análisis</h3>
+          <p class="feature-desc">KPIs en tiempo real, gráfico de ausencias por estado, distribución por departamento y widget de top retrasos con alerta visual para supervisión inmediata.</p>
+        </div>
+        <div class="feature-card reveal reveal-delay-1">
+          <div class="feature-icon"><svg viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-5 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z"/></svg></div>
+          <h3 class="feature-title">Reportes PDF</h3>
+          <p class="feature-desc">Informes de control horario detallados por día y resumidos por empleado. Previsualización en tabla y descarga con apertura automática en el visor del sistema.</p>
+        </div>
+        <div class="feature-card reveal reveal-delay-2">
+          <div class="feature-icon"><svg viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg></div>
+          <h3 class="feature-title">Configuración de sede</h3>
+          <p class="feature-desc">Geocodificación vía Nominatim (OpenStreetMap), coordenadas manuales con validación y ajuste del radio de geovallado para validar fichajes presenciales.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- WHY -->
+  <section class="why-section">
+    <div class="container">
+      <div class="why-grid">
+        <div class="why-visual reveal">
+          <div class="why-card"><div class="why-card-icon"><svg viewBox="0 0 24 24"><path d="M20 18c1.1 0 1.99-.9 1.99-2L22 6c0-1.1-.9-2-2-2H4c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2H0v2h24v-2h-4zM4 6h16v10H4V6z"/></svg></div><div><div class="why-card-title">Sin JRE necesario</div><div class="why-card-desc">El instalador incluye su propio entorno de ejecución. Un doble clic y listo, sin configurar Java.</div></div></div>
+          <div class="why-card"><div class="why-card-icon"><svg viewBox="0 0 24 24"><path d="M11.99 2C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zm6.93 6h-2.95c-.32-1.25-.78-2.45-1.38-3.56 1.84.63 3.37 1.91 4.33 3.56zM12 4.04c.83 1.2 1.48 2.53 1.91 3.96h-3.82c.43-1.43 1.08-2.76 1.91-3.96z"/></svg></div><div><div class="why-card-title">ES / EN dinámico</div><div class="why-card-desc">Cambio de idioma sin reiniciar la aplicación, persistido en preferencias del sistema operativo.</div></div></div>
+          <div class="why-card"><div class="why-card-icon"><svg viewBox="0 0 24 24"><path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4z"/></svg></div><div><div class="why-card-title">Sesión segura en memoria</div><div class="why-card-desc">JWT almacenado en un record inmutable volátil. Sin ficheros de sesión en disco; expiración con redirección automática.</div></div></div>
+          <div class="why-card"><div class="why-card-icon"><svg viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-5 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z"/></svg></div><div><div class="why-card-title">Instaladores nativos</div><div class="why-card-desc">.dmg para macOS y .msi para Windows generados automáticamente vía GitHub Actions en cada release.</div></div></div>
+        </div>
+        <div class="why-content reveal reveal-delay-2">
+          <div class="section-header" style="text-align:left;">
+            <span class="tag">Por qué GestorRH Escritorio</span>
+            <h2 class="section-title">El panel que tu empresa necesita</h2>
+            <p class="section-subtitle" style="margin:0;text-align:left;">Construido en JavaFX 21, consume exclusivamente la API REST sin acceso directo a base de datos.</p>
+          </div>
+          <div class="why-list">
+            <div class="why-item"><div class="why-check"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"></polyline></svg></div><div class="why-item-text"><strong>MVVM con separación estricta</strong><span>Views, ViewModels y Repositorios completamente desacoplados. Testeable en cada capa.</span></div></div>
+            <div class="why-item"><div class="why-check"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"></polyline></svg></div><div class="why-item-text"><strong>UI nunca bloqueada</strong><span>CompletableFuture con pool dedicado. El hilo de JavaFX siempre responde.</span></div></div>
+            <div class="why-item"><div class="why-check"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"></polyline></svg></div><div class="why-item-text"><strong>Multi-tenant por diseño</strong><span>Cada empresa ve solo sus datos. El aislamiento lo garantiza la API, no el cliente.</span></div></div>
+            <div class="why-item"><div class="why-check"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"></polyline></svg></div><div class="why-item-text"><strong>CI/CD con releases automáticas</strong><span>Cada tag en GitHub genera los instaladores nativos para ambas plataformas sin intervención manual.</span></div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- REQUISITOS -->
+  <section>
+    <div class="container">
+      <div class="section-header reveal">
+        <span class="tag">Requisitos</span>
+        <h2 class="section-title">Compatibilidad</h2>
+        <p class="section-subtitle">El instalador incluye todo lo necesario. No hace falta instalar Java.</p>
+      </div>
+      <div class="req-grid reveal">
+        <div class="req-card"><div class="req-icon"><svg viewBox="0 0 24 24" style="width:28px;height:28px;fill:var(--cyan);"><path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.8-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z"/></svg></div><div class="req-label">macOS</div><div class="req-value">macOS 11+<br/><small style="font-size:11px;color:var(--text-muted)">Big Sur o superior</small></div></div>
+        <div class="req-card"><div class="req-icon"><svg viewBox="0 0 24 24" style="width:28px;height:28px;fill:var(--cyan);"><path d="M3 12V6.75l6-1.32v6.57H3zm17 0V3l-8 1.43V12h8zM3 13h6v6.57l-6-1.32V13zm8 0h8v8L11 19.57V13z"/></svg></div><div class="req-label">Windows</div><div class="req-value">Windows 10+<br/><small style="font-size:11px;color:var(--text-muted)">64 bits</small></div></div>
+        <div class="req-card"><div class="req-icon"><svg viewBox="0 0 24 24" style="width:28px;height:28px;fill:var(--cyan);"><path d="M20 18c1.1 0 1.99-.9 1.99-2L22 6c0-1.1-.9-2-2-2H4c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2H0v2h24v-2h-4z"/></svg></div><div class="req-label">Java</div><div class="req-value">No necesario<br/><small style="font-size:11px;color:var(--text-muted)">Incluido en instalador</small></div></div>
+        <div class="req-card"><div class="req-icon"><svg viewBox="0 0 24 24" style="width:28px;height:28px;fill:var(--cyan);"><path d="M1 9l2 2c4.97-4.97 13.03-4.97 18 0l2-2C16.93 2.93 7.08 2.93 1 9zm8 8l3 3 3-3c-1.65-1.66-4.34-1.66-6 0zm-4-4l2 2c2.76-2.76 7.24-2.76 10 0l2-2C15.14 9.14 8.87 9.14 5 13z"/></svg></div><div class="req-label">Conexión</div><div class="req-value">Requerida<br/><small style="font-size:11px;color:var(--text-muted)">Acceso a la API</small></div></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- INSTALACIÓN -->
+  <section id="instalacion">
+    <div class="container">
+      <div class="section-header reveal">
+        <span class="tag">Instalación</span>
+        <h2 class="section-title">Primeros pasos</h2>
+        <p class="section-subtitle">Descarga el instalador para tu plataforma y sigue las instrucciones. No necesitas configurar nada más.</p>
+      </div>
+      <div class="install-grid reveal">
+        <div class="install-card">
+          <div class="install-platform">
+            <svg viewBox="0 0 24 24"><path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.8-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z"/></svg>
+            macOS — .dmg
+          </div>
+          <ol class="install-steps">
+            <li><div class="step-num">1</div><span>Descarga el archivo <code>.dmg</code> con el botón de arriba.</span></li>
+            <li><div class="step-num">2</div><span>Abre el <code>.dmg</code> y arrastra <strong>GestorRH</strong> a la carpeta Aplicaciones.</span></li>
+            <li><div class="step-num">3</div><span>Haz clic derecho sobre la app → <strong>Abrir</strong> para el primer arranque.</span></li>
+          </ol>
+          <div class="install-note">
+            Si macOS bloquea la app ("Apple no puede verificar..."), abre Terminal y ejecuta:<br/>
+            <code>xattr -cr /Applications/GestorRH.app</code><br/>
+            Ocurre porque el instalador no está firmado con un certificado de Apple.
+          </div>
+        </div>
+        <div class="install-card">
+          <div class="install-platform">
+            <svg viewBox="0 0 24 24"><path d="M3 12V6.75l6-1.32v6.57H3zm17 0V3l-8 1.43V12h8zM3 13h6v6.57l-6-1.32V13zm8 0h8v8L11 19.57V13z"/></svg>
+            Windows — .msi
+          </div>
+          <ol class="install-steps">
+            <li><div class="step-num">1</div><span>Descarga el archivo <code>.msi</code> con el botón de arriba.</span></li>
+            <li><div class="step-num">2</div><span>Ejecuta el instalador y sigue el asistente.</span></li>
+            <li><div class="step-num">3</div><span>Si aparece SmartScreen, pulsa <strong>Más información → Ejecutar de todas formas</strong>.</span></li>
+          </ol>
+          <div class="install-note">
+            Si el antivirus bloquea la instalación, añade una excepción para el <code>.msi</code> o deshabilita temporalmente la protección en tiempo real. El instalador no está firmado con certificado de desarrollador.
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- DESCARGA CTA -->
+  <section class="download-section" id="descarga">
+    <div class="container">
+      <div class="download-inner reveal">
+        <span class="tag">Descarga gratuita</span>
+        <h2 class="download-title">Instala en minutos.<br/><span>Sin configurar Java.</span></h2>
+        <p class="download-subtitle">Elige tu plataforma y descarga el instalador que incluye todo lo necesario.</p>
+        <div class="download-actions">
+          <div class="dl-buttons">
+            <button id="btn-macos-cta" class="dl-btn" onclick="triggerDownload('macos')">
+              <svg viewBox="0 0 24 24"><path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.8-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z"/></svg>
+              <div class="dl-btn-info"><span class="dl-btn-label">macOS (.dmg)</span><span class="dl-version" id="ver-macos-cta">v1.0.0</span></div>
+            </button>
+            <button id="btn-windows-cta" class="dl-btn" onclick="triggerDownload('windows')">
+              <svg viewBox="0 0 24 24"><path d="M3 12V6.75l6-1.32v6.57H3zm17 0V3l-8 1.43V12h8zM3 13h6v6.57l-6-1.32V13zm8 0h8v8L11 19.57V13z"/></svg>
+              <div class="dl-btn-info"><span class="dl-btn-label">Windows (.msi)</span><span class="dl-version" id="ver-windows-cta">v1.0.0</span></div>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CHANGELOG (colapsable) -->
+  <section id="novedades">
+    <div class="container">
+      <div class="section-header reveal">
+        <span class="tag">Novedades</span>
+        <h2 class="section-title">Últimas actualizaciones</h2>
+      </div>
+      <div class="changelog-accordion reveal">
+        <button class="changelog-toggle" id="cl-toggle" onclick="toggleChangelog()">
+          <div class="changelog-toggle-info">
+            <span id="cl-toggle-label">Cargando versión...</span>
+            <span class="changelog-stable" id="cl-badge-toggle">STABLE</span>
+          </div>
+          <svg class="changelog-toggle-arrow" viewBox="0 0 24 24"><path d="M7 10l5 5 5-5z"/></svg>
+        </button>
+        <div class="changelog-panel" id="cl-panel">
+          <div class="changelog-card">
+            <div class="changelog-header">
+              <div class="changelog-title-row">
+                <span class="changelog-version" id="cl-version">Cargando…</span>
+                <span class="changelog-stable" id="cl-badge">STABLE</span>
+              </div>
+              <span class="changelog-date" id="cl-date"></span>
+            </div>
+            <div class="changelog-body">
+              <div class="changelog-content" id="cl-body">
+                <div class="changelog-loading">Cargando novedades<span class="changelog-dot">.</span><span class="changelog-dot" style="animation-delay:.3s">.</span><span class="changelog-dot" style="animation-delay:.6s">.</span></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <script src="../shared/nav.js"></script>
+  <script>
+    let assets = { macos: null, windows: null };
+
+    async function triggerDownload(platform) {
+      const url = assets[platform];
+      if (!url) { window.open('https://github.com/GestorRH-Multiplataforma/GestorRH-Escritorio/releases/latest', '_blank'); return; }
+      window.open(url, '_blank');
+    }
+
+    function toggleChangelog() {
+      document.getElementById('cl-toggle').classList.toggle('open');
+      document.getElementById('cl-panel').classList.toggle('open');
+    }
+
+    async function loadRelease() {
+      try {
+        const res  = await fetch('https://api.github.com/repos/GestorRH-Multiplataforma/GestorRH-Escritorio/releases/latest');
+        if (!res.ok) throw new Error();
+        const data = await res.json();
+        const version = data.tag_name || 'v1.0.0';
+        const date    = data.published_at ? new Date(data.published_at).toLocaleDateString('es-ES', { year:'numeric', month:'long', day:'numeric' }) : '';
+
+        const dmg = data.assets?.find(a => a.name.endsWith('.dmg'));
+        const msi = data.assets?.find(a => a.name.endsWith('.msi'));
+        assets.macos   = dmg?.browser_download_url || data.html_url;
+        assets.windows = msi?.browser_download_url || data.html_url;
+
+        ['ver-macos','ver-macos-cta'].forEach(id => { const el = document.getElementById(id); if(el) el.textContent = version; });
+        ['ver-windows','ver-windows-cta'].forEach(id => { const el = document.getElementById(id); if(el) el.textContent = version; });
+
+        /* Detectar plataforma y resaltar botón */
+        const plat = GRH.detectPlatform();
+        if (plat === 'macos')   { document.getElementById('btn-macos')?.classList.add('detected');   document.getElementById('btn-macos-cta')?.classList.add('detected'); }
+        if (plat === 'windows') { document.getElementById('btn-windows')?.classList.add('detected'); document.getElementById('btn-windows-cta')?.classList.add('detected'); }
+
+        document.getElementById('cl-version').textContent     = version;
+        document.getElementById('cl-date').textContent        = date;
+        document.getElementById('cl-toggle-label').textContent = 'Novedades en ' + version;
+        if (!data.prerelease) { document.getElementById('cl-badge').style.display = document.getElementById('cl-badge-toggle').style.display = 'inline-flex'; }
+        document.getElementById('cl-body').innerHTML = GRH.markdownToHtml(data.body || '_Sin notas disponibles._');
+        document.getElementById('grh-footer-version').textContent = 'Escritorio ' + version;
+      } catch {
+        ['ver-macos','ver-macos-cta','ver-windows','ver-windows-cta'].forEach(id => { const el = document.getElementById(id); if(el) el.textContent = 'v1.0.0'; });
+        document.getElementById('cl-toggle-label').textContent = 'Novedades en v1.0.0';
+        document.getElementById('cl-badge').style.display = document.getElementById('cl-badge-toggle').style.display = 'inline-flex';
+        document.getElementById('cl-version').textContent = 'v1.0.0';
+        document.getElementById('cl-body').innerHTML = '<p>Primera versión estable. Incluye gestión de empleados, turnos, ausencias, dashboard, reportes PDF e instaladores nativos para macOS y Windows.</p>';
+      }
+    }
+    loadRelease();
+  </script>
+</body>
+</html>
