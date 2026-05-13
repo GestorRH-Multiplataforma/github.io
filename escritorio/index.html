@@ -7,66 +7,110 @@
   <meta name="description" content="Panel administrativo para empresas. Gestiona empleados, turnos, ausencias y genera reportes desde macOS o Windows." />
   <link rel="stylesheet" href="../shared/styles.css" />
   <style>
-    /* ── HERO ESCRITORIO ──────────────────────────────────── */
     .hero-content { position: relative; z-index: 1; display: grid; grid-template-columns: 1fr 1fr; gap: 60px; align-items: center; }
     .hero-eyebrow { margin-bottom: 24px; }
 
-    /* Window mockup */
     .hero-visual { display: flex; justify-content: center; align-items: center; }
-    .window-wrapper { width: 100%; max-width: 480px; animation: float 5s ease-in-out infinite; }
+    .window-wrapper { width: 100%; max-width: 500px; animation: float 5s ease-in-out infinite; }
     .window {
-      background: var(--surface); border-radius: 12px;
-      border: 1px solid rgba(0,168,232,0.2);
+      border-radius: 10px;
+      border: 1px solid rgba(0,168,232,0.25);
       box-shadow: 0 40px 80px rgba(0,0,0,0.5), 0 0 0 1px rgba(255,255,255,0.04), var(--shadow-cyan);
       overflow: hidden;
     }
-    .window-bar {
-      background: var(--surface-2); padding: 10px 16px;
-      display: flex; align-items: center; gap: 10px;
-      border-bottom: 1px solid rgba(255,255,255,0.06);
-    }
-    .window-dots { display: flex; gap: 6px; }
-    .window-dot { width: 10px; height: 10px; border-radius: 50%; }
-    .wd-red   { background: #FF5F57; }
-    .wd-amber { background: #FFBD2E; }
-    .wd-green { background: #28C840; }
-    .window-title { font-size: 12px; color: rgba(255,255,255,0.4); font-weight: 500; margin: 0 auto; }
-    .window-body { display: flex; height: 300px; }
+
+    /* App shell — sin barra macOS */
+    .win-app { display: flex; height: 360px; }
 
     /* Sidebar */
-    .win-sidebar {
-      width: 52px; background: rgba(0,0,0,0.2);
-      border-right: 1px solid rgba(255,255,255,0.05);
+    .win-side {
+      width: 52px; background: #0d2137; flex-shrink: 0;
       display: flex; flex-direction: column; align-items: center;
-      padding: 12px 0; gap: 18px;
+      padding: 12px 0; gap: 4px;
     }
-    .win-sidebar-icon {
-      width: 32px; height: 32px; border-radius: 8px;
+    .sbi {
+      width: 36px; height: 30px; border-radius: 6px;
       display: flex; align-items: center; justify-content: center;
-      cursor: pointer; transition: background 0.2s;
     }
-    .win-sidebar-icon.active { background: rgba(0,168,232,0.2); }
-    .win-sidebar-icon svg { width: 16px; height: 16px; fill: rgba(255,255,255,0.4); }
-    .win-sidebar-icon.active svg { fill: var(--cyan); }
+    .sbi.on { background: rgba(0,168,232,0.2); }
+    .sbi svg { width: 14px; height: 14px; fill: rgba(255,255,255,0.3); }
+    .sbi.on svg { fill: #00A8E8; }
+    .sbi-wrap { position: relative; }
+    .sbi-dot {
+      position: absolute; top: -1px; right: -1px;
+      width: 12px; height: 12px; border-radius: 50%;
+      background: #00A8E8; font-size: 7px; font-weight: 700; color: #fff;
+      display: flex; align-items: center; justify-content: center;
+    }
 
-    /* Main content area */
-    .win-main { flex: 1; padding: 16px; overflow: hidden; }
-    .win-header { font-family: 'Epilogue', sans-serif; font-size: 13px; font-weight: 700; margin-bottom: 12px; color: var(--white); }
-    .win-kpi-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 12px; }
-    .win-kpi { background: var(--surface-2); border-radius: 8px; padding: 10px; border: 1px solid rgba(255,255,255,0.05); }
-    .win-kpi-label { font-size: 8px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 3px; }
-    .win-kpi-value { font-family: 'Epilogue', sans-serif; font-size: 18px; font-weight: 800; color: var(--white); line-height: 1; }
-    .win-kpi-sub { font-size: 8px; color: var(--cyan); margin-top: 2px; }
-    .win-table-header { display: grid; grid-template-columns: 2fr 1fr 1fr 1fr; gap: 4px; padding: 4px 8px; font-size: 8px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.06em; }
-    .win-row { display: grid; grid-template-columns: 2fr 1fr 1fr 1fr; gap: 4px; padding: 6px 8px; background: var(--surface-2); border-radius: 6px; margin-bottom: 3px; align-items: center; }
-    .win-row-name { font-size: 10px; font-weight: 500; color: var(--white); }
-    .win-row-cell { font-size: 9px; color: rgba(255,255,255,0.5); }
-    .win-badge { font-size: 8px; padding: 2px 6px; border-radius: 100px; font-weight: 700; display: inline-block; }
-    .wb-ok      { background: rgba(46,125,50,0.2); color: #66BB6A; }
-    .wb-warn    { background: rgba(245,124,0,0.2); color: #FFA726; }
-    .wb-pending { background: rgba(0,168,232,0.15); color: var(--cyan); }
+    /* Main */
+    .win-main { flex: 1; display: flex; flex-direction: column; background: #f4f6f9; overflow: hidden; }
 
-    /* ── INSTALL SECTION ──────────────────────────────────── */
+    /* Topbar */
+    .win-top {
+      background: #fff; border-bottom: 1px solid #e2e6ea;
+      padding: 6px 12px; display: flex; align-items: center; justify-content: space-between;
+      flex-shrink: 0;
+    }
+    .win-top-l { display: flex; align-items: center; gap: 5px; }
+    .win-appname { font-size: 10px; font-weight: 700; color: #0d2137; }
+    .win-sep { font-size: 10px; color: #ccc; }
+    .win-pagename { font-size: 10px; color: #888; }
+    .win-top-r { display: flex; align-items: center; gap: 5px; }
+    .win-langbox { display:flex; border:1px solid #ddd; border-radius:4px; overflow:hidden; }
+    .win-langbox span { font-size:7px; font-weight:700; padding:2px 5px; color:#888; }
+    .win-langbox span.on { background:#0d2137; color:#fff; }
+    .win-av { width:20px;height:20px;border-radius:50%;background:#0d2137;color:#fff;font-size:7px;font-weight:700;display:flex;align-items:center;justify-content:center; }
+    .win-cname { font-size:8px; color:#555; }
+
+    /* Body */
+    .win-body { flex:1; padding:10px 12px; display:flex; flex-direction:column; gap:8px; overflow:hidden; }
+    .win-heading { font-size:11px; font-weight:700; color:#0d2137; }
+
+    /* KPIs */
+    .win-kpis { display:grid; grid-template-columns:repeat(3,1fr); gap:7px; }
+    .win-kpi {
+      background:#fff; border-radius:6px; border:1px solid #e4e8ed;
+      border-left:3px solid #00A8E8; padding:8px 9px;
+    }
+    .win-kpi-head { display:flex; align-items:center; gap:5px; margin-bottom:5px; }
+    .win-kpi-ico { width:16px;height:16px;border-radius:4px;background:rgba(0,168,232,0.1);display:flex;align-items:center;justify-content:center; }
+    .win-kpi-ico svg { width:10px;height:10px;fill:#00A8E8; }
+    .win-kpi-lbl { font-size:7.5px;color:#777;font-weight:600; }
+    .win-kpi-num { font-size:20px;font-weight:800;color:#0d2137;line-height:1;margin-bottom:3px; }
+    .win-kpi-hint { font-size:7px;color:#bbb;display:flex;align-items:center;gap:3px; }
+    .win-kpi-hint svg { width:8px;height:8px;fill:#bbb; }
+
+    /* Widgets */
+    .win-widgets { display:grid; grid-template-columns:5fr 5fr 4fr; gap:7px; flex:1; min-height:0; }
+    .win-wgt {
+      background:#fff; border-radius:6px; border:1px solid #e4e8ed;
+      padding:8px 9px; display:flex; flex-direction:column; overflow:hidden;
+    }
+    .win-wgt-title { font-size:8px;font-weight:700;color:#0d2137;border-bottom:1px solid #f0f2f5;padding-bottom:4px;margin-bottom:6px;flex-shrink:0; }
+    .win-wgt-body { flex:1; display:flex; align-items:center; justify-content:center; min-height:0; }
+
+    /* Pie legend */
+    .pie-legend { display:flex;flex-direction:column;gap:4px;font-size:7px;color:#444; }
+    .pie-leg-item { display:flex;align-items:center;gap:4px; }
+    .pie-dot { width:7px;height:7px;border-radius:50%;flex-shrink:0; }
+
+    /* Bar chart */
+    .bars { display:flex;align-items:flex-end;gap:5px;height:80px;width:100%;position:relative;padding-bottom:16px; }
+    .bars::after { content:'';position:absolute;bottom:16px;left:0;right:0;height:1px;background:#eee; }
+    .bar-c { display:flex;flex-direction:column;align-items:center;gap:3px;flex:1; }
+    .bar-b { border-radius:2px 2px 0 0;width:100%; }
+    .bar-lbl { font-size:6.5px;color:#aaa;white-space:nowrap; }
+
+    /* Top retrasos lista */
+    .retraso-list { display:flex;flex-direction:column;gap:5px;width:100%; }
+    .retraso-item { display:flex;align-items:center;justify-content:space-between; }
+    .retraso-name { font-size:7.5px;color:#333;font-weight:600; }
+    .retraso-bar-wrap { flex:1;margin:0 6px;height:4px;background:#f0f2f5;border-radius:2px; }
+    .retraso-bar-fill { height:4px;border-radius:2px;background:#1a4a7a; }
+    .retraso-min { font-size:7px;color:#1a4a7a;font-weight:700; }
+
+    /* ── INSTALL ─────────────────────────────────────────────── */
     .install-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
     .install-card { background: var(--surface); border: 1px solid var(--border); border-radius: 20px; padding: 28px; }
     .install-platform { display: flex; align-items: center; gap: 10px; font-family: 'Epilogue', sans-serif; font-size: 16px; font-weight: 700; margin-bottom: 16px; }
@@ -86,37 +130,25 @@
 </head>
 <body data-page="escritorio">
 
-  <!-- HERO -->
   <section class="hero">
     <div class="hero-bg"></div>
     <div class="hero-grid"></div>
     <div class="container">
       <div class="hero-content">
+
         <div class="hero-text">
-          <div class="hero-eyebrow">
-            <span class="tag">Escritorio · Rol Empresa</span>
-          </div>
-          <h1 class="hero-title">
-            Control total<br /><span>desde tu escritorio</span>
-          </h1>
-          <p class="hero-subtitle">
-            Panel administrativo nativo para macOS y Windows. Gestiona empleados, planifica turnos, valida ausencias y genera reportes PDF sin instalar Java.
-          </p>
+          <div class="hero-eyebrow"><span class="tag">Escritorio · Rol Empresa</span></div>
+          <h1 class="hero-title">Control total<br /><span>desde tu escritorio</span></h1>
+          <p class="hero-subtitle">Panel administrativo nativo para macOS y Windows. Gestiona empleados, planifica turnos, valida ausencias y genera reportes PDF sin instalar Java.</p>
           <div class="hero-actions">
             <div class="dl-buttons">
               <button id="btn-macos" class="dl-btn" onclick="triggerDownload('macos')">
                 <svg viewBox="0 0 24 24"><path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.8-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z"/></svg>
-                <div class="dl-btn-info">
-                  <span class="dl-btn-label">Descargar para macOS</span>
-                  <span class="dl-version" id="ver-macos">...</span>
-                </div>
+                <div class="dl-btn-info"><span class="dl-btn-label">Descargar para macOS</span><span class="dl-version" id="ver-macos">...</span></div>
               </button>
               <button id="btn-windows" class="dl-btn" onclick="triggerDownload('windows')">
                 <svg viewBox="0 0 24 24"><path d="M3 12V6.75l6-1.32v6.57H3zm17 0V3l-8 1.43V12h8zM3 13h6v6.57l-6-1.32V13zm8 0h8v8L11 19.57V13z"/></svg>
-                <div class="dl-btn-info">
-                  <span class="dl-btn-label">Descargar para Windows</span>
-                  <span class="dl-version" id="ver-windows">...</span>
-                </div>
+                <div class="dl-btn-info"><span class="dl-btn-label">Descargar para Windows</span><span class="dl-version" id="ver-windows">...</span></div>
               </button>
             </div>
             <a href="https://github.com/GestorRH-Multiplataforma/GestorRH-Escritorio/releases/latest" target="_blank" rel="noopener" class="btn-secondary">
@@ -131,45 +163,172 @@
           </div>
         </div>
 
-        <!-- Window mockup -->
+        <!-- ── MOCKUP ──────────────────────────────────────────── -->
         <div class="hero-visual">
           <div class="window-wrapper">
             <div class="window">
-              <div class="window-bar">
-                <div class="window-dots">
-                  <div class="window-dot wd-red"></div>
-                  <div class="window-dot wd-amber"></div>
-                  <div class="window-dot wd-green"></div>
-                </div>
-                <span class="window-title">GestorRH — Dashboard</span>
-              </div>
-              <div class="window-body">
-                <!-- Sidebar icons -->
-                <div class="win-sidebar">
-                  <div class="win-sidebar-icon active"><svg viewBox="0 0 24 24"><path d="M3 13h8V3H3v10zm0 8h8v-6H3v6zm10 0h8V11h-8v10zm0-18v6h8V3h-8z"/></svg></div>
-                  <div class="win-sidebar-icon"><svg viewBox="0 0 24 24"><path d="M12 12c2.7 0 4.8-2.1 4.8-4.8S14.7 2.4 12 2.4 7.2 4.5 7.2 7.2 9.3 12 12 12zm0 2.4c-3.2 0-9.6 1.6-9.6 4.8v2.4h19.2v-2.4c0-3.2-6.4-4.8-9.6-4.8z"/></svg></div>
-                  <div class="win-sidebar-icon"><svg viewBox="0 0 24 24"><path d="M19 3h-1V1h-2v2H8V1H6v2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V8h14v11z"/></svg></div>
-                  <div class="win-sidebar-icon"><svg viewBox="0 0 24 24"><path d="M17 12h-5v5h5v-5zM16 1v2H8V1H6v2H5c-1.1 0-1.99.9-1.99 2L3 19c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2h-1V1h-2zm3 18H5V8h14v11z"/></svg></div>
-                  <div class="win-sidebar-icon"><svg viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-5 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z"/></svg></div>
-                </div>
-                <!-- Main panel -->
-                <div class="win-main">
-                  <div class="win-header">Dashboard · Hoy</div>
-                  <div class="win-kpi-grid">
-                    <div class="win-kpi"><div class="win-kpi-label">Empleados activos</div><div class="win-kpi-value">24</div><div class="win-kpi-sub">↑ 2 este mes</div></div>
-                    <div class="win-kpi"><div class="win-kpi-label">Turnos hoy</div><div class="win-kpi-value">18</div><div class="win-kpi-sub">6 tarde</div></div>
-                    <div class="win-kpi"><div class="win-kpi-label">Ausencias pend.</div><div class="win-kpi-value" style="color:#FFA726;">3</div><div class="win-kpi-sub">Por revisar</div></div>
+              <div class="win-app">
+
+                <!-- Sidebar -->
+                <div class="win-side">
+                  <div class="sbi on">
+                    <svg viewBox="0 0 24 24"><path d="M3 13h8V3H3v10zm0 8h8v-6H3v6zm10 0h8V11h-8v10zm0-18v6h8V3h-8z"/></svg>
                   </div>
-                  <div class="win-table-header"><span>Empleado</span><span>Turno</span><span>Entrada</span><span>Estado</span></div>
-                  <div class="win-row"><span class="win-row-name">Ana García</span><span class="win-row-cell">Mañana</span><span class="win-row-cell">08:02</span><span><span class="win-badge wb-ok">Activo</span></span></div>
-                  <div class="win-row"><span class="win-row-name">Luis Martín</span><span class="win-row-cell">Mañana</span><span class="win-row-cell">08:15</span><span><span class="win-badge wb-warn">Retraso</span></span></div>
-                  <div class="win-row"><span class="win-row-name">Sara López</span><span class="win-row-cell">—</span><span class="win-row-cell">—</span><span><span class="win-badge wb-pending">Ausencia</span></span></div>
-                  <div class="win-row"><span class="win-row-name">Carlos Ruiz</span><span class="win-row-cell">Tarde</span><span class="win-row-cell">—</span><span><span class="win-badge wb-ok">Pendiente</span></span></div>
+                  <div class="sbi">
+                    <svg viewBox="0 0 24 24"><path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z"/></svg>
+                  </div>
+                  <div class="sbi">
+                    <svg viewBox="0 0 24 24"><path d="M19 3h-1V1h-2v2H8V1H6v2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V8h14v11z"/></svg>
+                  </div>
+                  <div class="sbi-wrap">
+                    <div class="sbi">
+                      <svg viewBox="0 0 24 24"><path d="M17 12h-5v5h5v-5zM16 1v2H8V1H6v2H5c-1.1 0-1.99.9-1.99 2L3 19c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2h-1V1h-2zm3 18H5V8h14v11z"/></svg>
+                    </div>
+                    <div class="sbi-dot">3</div>
+                  </div>
+                  <div class="sbi">
+                    <svg viewBox="0 0 24 24"><path d="M5 9.2h3V19H5zM10.6 5h2.8v14h-2.8zm5.6 8H19v6h-2.8z"/></svg>
+                  </div>
+                  <div class="sbi" style="margin-top:auto;">
+                    <svg viewBox="0 0 24 24"><path d="M19.14 12.94c.04-.3.06-.61.06-.94 0-.32-.02-.64-.07-.94l2.03-1.58c.18-.14.23-.41.12-.61l-1.92-3.32c-.12-.22-.37-.29-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94l-.36-2.54c-.04-.24-.24-.41-.48-.41h-3.84c-.24 0-.43.17-.47.41l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96c-.22-.08-.47 0-.59.22L2.74 8.87c-.12.21-.08.47.12.61l2.03 1.58c-.05.3-.09.63-.09.94s.02.64.07.94l-2.03 1.58c-.18.14-.23.41-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .44-.17.47-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32c.12-.22.07-.47-.12-.61l-2.01-1.58zM12 15.6c-1.98 0-3.6-1.62-3.6-3.6s1.62-3.6 3.6-3.6 3.6 1.62 3.6 3.6-1.62 3.6-3.6 3.6z"/></svg>
+                  </div>
+                </div>
+
+                <div class="win-main">
+                  <!-- Topbar -->
+                  <div class="win-top">
+                    <div class="win-top-l">
+                      <span class="win-appname">GestorRH</span>
+                      <span class="win-sep">|</span>
+                      <span class="win-pagename">Inicio</span>
+                    </div>
+                    <div class="win-top-r">
+                      <div class="win-langbox"><span class="on">ES</span><span>EN</span></div>
+                      <div class="win-av">TS</div>
+                      <span class="win-cname">Tech Solutions S.L.</span>
+                    </div>
+                  </div>
+
+                  <div class="win-body">
+                    <div class="win-heading">Gestiona tu equipo, turnos y ausencias desde un solo lugar.</div>
+
+                    <!-- KPIs con datos reales -->
+                    <div class="win-kpis">
+                      <div class="win-kpi">
+                        <div class="win-kpi-head">
+                          <div class="win-kpi-ico"><svg viewBox="0 0 24 24"><path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z"/></svg></div>
+                          <span class="win-kpi-lbl">Total en plantilla</span>
+                        </div>
+                        <div class="win-kpi-num">24</div>
+                        <div class="win-kpi-hint"><svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/></svg>Trabajadores sin baja activa</div>
+                      </div>
+                      <div class="win-kpi">
+                        <div class="win-kpi-head">
+                          <div class="win-kpi-ico"><svg viewBox="0 0 24 24"><path d="M19 3h-1V1h-2v2H8V1H6v2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V8h14v11z"/></svg></div>
+                          <span class="win-kpi-lbl">Con turno hoy</span>
+                        </div>
+                        <div class="win-kpi-num">18</div>
+                        <div class="win-kpi-hint"><svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/></svg>12 mañana · 6 tarde</div>
+                      </div>
+                      <div class="win-kpi" style="border-left-color:#00A8E8;">
+                        <div class="win-kpi-head">
+                          <div class="win-kpi-ico" style="background:rgba(0,168,232,0.1);"><svg viewBox="0 0 24 24" style="fill:#00A8E8;"><path d="M17 12h-5v5h5v-5zM16 1v2H8V1H6v2H5c-1.1 0-1.99.9-1.99 2L3 19c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2h-1V1h-2zm3 18H5V8h14v11z"/></svg></div>
+                          <span class="win-kpi-lbl">Ausencias pend.</span>
+                        </div>
+                        <div class="win-kpi-num" style="color:#1a4a7a;">3</div>
+                        <div class="win-kpi-hint" style="color:#1a4a7a;"><svg viewBox="0 0 24 24" style="fill:#00A8E8;"><path d="M1 21h22L12 2 1 21zm12-3h-2v-2h2v2zm0-4h-2v-4h2v4z"/></svg>Por revisar</div>
+                      </div>
+                    </div>
+
+                    <!-- 3 Widgets con datos reales -->
+                    <div class="win-widgets">
+
+                      <!-- Empleados por departamento -->
+                      <div class="win-wgt">
+                        <div class="win-wgt-title">Empleados por departamento</div>
+                        <div class="win-wgt-body" style="gap:10px;">
+                          <svg width="72" height="72" viewBox="0 0 72 72" style="flex-shrink:0;">
+                            <!-- IT 8/24=33% → 132° · Ops 6/24=25% → 99° · Dev 5/24=21% → 83° · HR 3/24=13% → 50° · Mgmt 2/24=8% → 32° -->
+                            <circle cx="36" cy="36" r="26" fill="none" stroke="#1a4a7a" stroke-width="20" stroke-dasharray="54 109" stroke-dashoffset="0"/>
+                            <circle cx="36" cy="36" r="26" fill="none" stroke="#2372b8" stroke-width="20" stroke-dasharray="41 122" stroke-dashoffset="-54"/>
+                            <circle cx="36" cy="36" r="26" fill="none" stroke="#4ba8e0" stroke-width="20" stroke-dasharray="34 129" stroke-dashoffset="-95"/>
+                            <circle cx="36" cy="36" r="26" fill="none" stroke="#7ec8f0" stroke-width="20" stroke-dasharray="21 142" stroke-dashoffset="-129"/>
+                            <circle cx="36" cy="36" r="26" fill="none" stroke="#b8e2f9" stroke-width="20" stroke-dasharray="13 150" stroke-dashoffset="-150"/>
+                            <circle cx="36" cy="36" r="13" fill="#fff"/>
+                          </svg>
+                          <div class="pie-legend">
+                            <div class="pie-leg-item"><div class="pie-dot" style="background:#1a4a7a;"></div>IT (8)</div>
+                            <div class="pie-leg-item"><div class="pie-dot" style="background:#2372b8;"></div>Operaciones (6)</div>
+                            <div class="pie-leg-item"><div class="pie-dot" style="background:#4ba8e0;"></div>Desarrollo (5)</div>
+                            <div class="pie-leg-item"><div class="pie-dot" style="background:#7ec8f0;"></div>RRHH (3)</div>
+                            <div class="pie-leg-item"><div class="pie-dot" style="background:#b8e2f9;"></div>Dirección (2)</div>
+                          </div>
+                        </div>
+                      </div>
+
+                      <!-- Ausencias por estado -->
+                      <div class="win-wgt">
+                        <div class="win-wgt-title">Ausencias por estado</div>
+                        <div class="win-wgt-body" style="align-items:flex-end;">
+                          <div class="bars">
+                            <div class="bar-c">
+                              <div class="bar-b" style="height:62px;background:#1a4a7a;"></div>
+                              <span class="bar-lbl">Aprobada</span>
+                            </div>
+                            <div class="bar-c">
+                              <div class="bar-b" style="height:22px;background:#7ec8f0;"></div>
+                              <span class="bar-lbl">Rechazada</span>
+                            </div>
+                            <div class="bar-c">
+                              <div class="bar-b" style="height:22px;background:#00A8E8;"></div>
+                              <span class="bar-lbl">Solicitada</span>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+
+                      <!-- Top Retrasos con datos reales -->
+                      <div class="win-wgt">
+                        <div class="win-wgt-title">Top Retrasos</div>
+                        <div class="win-wgt-body" style="align-items:flex-start;padding-top:2px;">
+                          <div class="retraso-list">
+                            <div class="retraso-item">
+                              <span class="retraso-name">L. Martín</span>
+                              <div class="retraso-bar-wrap"><div class="retraso-bar-fill" style="width:100%;"></div></div>
+                              <span class="retraso-min">42 min</span>
+                            </div>
+                            <div class="retraso-item">
+                              <span class="retraso-name">C. Ruiz</span>
+                              <div class="retraso-bar-wrap"><div class="retraso-bar-fill" style="width:71%;"></div></div>
+                              <span class="retraso-min">30 min</span>
+                            </div>
+                            <div class="retraso-item">
+                              <span class="retraso-name">M. Torres</span>
+                              <div class="retraso-bar-wrap"><div class="retraso-bar-fill" style="width:52%;"></div></div>
+                              <span class="retraso-min">22 min</span>
+                            </div>
+                            <div class="retraso-item">
+                              <span class="retraso-name">P. Vega</span>
+                              <div class="retraso-bar-wrap"><div class="retraso-bar-fill" style="width:33%;"></div></div>
+                              <span class="retraso-min">14 min</span>
+                            </div>
+                            <div class="retraso-item">
+                              <span class="retraso-name">A. Sanz</span>
+                              <div class="retraso-bar-wrap"><div class="retraso-bar-fill" style="width:19%;"></div></div>
+                              <span class="retraso-min">8 min</span>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
           </div>
         </div>
+
       </div>
     </div>
   </section>
@@ -183,36 +342,12 @@
         <p class="section-subtitle">Todas las herramientas que necesita tu empresa para gestionar personas, turnos y presencia.</p>
       </div>
       <div class="features-grid">
-        <div class="feature-card reveal">
-          <div class="feature-icon"><svg viewBox="0 0 24 24"><path d="M12 12c2.7 0 4.8-2.1 4.8-4.8S14.7 2.4 12 2.4 7.2 4.5 7.2 7.2 9.3 12 12 12zm0 2.4c-3.2 0-9.6 1.6-9.6 4.8v2.4h19.2v-2.4c0-3.2-6.4-4.8-9.6-4.8z"/></svg></div>
-          <h3 class="feature-title">Gestión de empleados</h3>
-          <p class="feature-desc">Directorio con paginación, búsqueda y filtros. Alta con contraseña generada automáticamente, baja programada, readmisión y restablecimiento de credenciales.</p>
-        </div>
-        <div class="feature-card reveal reveal-delay-1">
-          <div class="feature-icon"><svg viewBox="0 0 24 24"><path d="M19 3h-1V1h-2v2H8V1H6v2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V8h14v11z"/></svg></div>
-          <h3 class="feature-title">Planificación de turnos</h3>
-          <p class="feature-desc">Catálogo de turnos con CRUD completo, soporte de turnos nocturnos y asignación visual en calendario mensual con edición y registro de cambios.</p>
-        </div>
-        <div class="feature-card reveal reveal-delay-2">
-          <div class="feature-icon"><svg viewBox="0 0 24 24"><path d="M17 12h-5v5h5v-5zM16 1v2H8V1H6v2H5c-1.1 0-1.99.9-1.99 2L3 19c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2h-1V1h-2zm3 18H5V8h14v11z"/></svg></div>
-          <h3 class="feature-title">Gestión de ausencias</h3>
-          <p class="feature-desc">Bandeja de revisión con pestañas por estado. Aprueba o rechaza con observaciones y descarga los justificantes adjuntados por el empleado.</p>
-        </div>
-        <div class="feature-card reveal">
-          <div class="feature-icon"><svg viewBox="0 0 24 24"><path d="M5 9.2h3V19H5zM10.6 5h2.8v14h-2.8zm5.6 8H19v6h-2.8z"/></svg></div>
-          <h3 class="feature-title">Dashboard y análisis</h3>
-          <p class="feature-desc">KPIs en tiempo real, gráfico de ausencias por estado, distribución por departamento y widget de top retrasos con alerta visual para supervisión inmediata.</p>
-        </div>
-        <div class="feature-card reveal reveal-delay-1">
-          <div class="feature-icon"><svg viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-5 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z"/></svg></div>
-          <h3 class="feature-title">Reportes PDF</h3>
-          <p class="feature-desc">Informes de control horario detallados por día y resumidos por empleado. Previsualización en tabla y descarga con apertura automática en el visor del sistema.</p>
-        </div>
-        <div class="feature-card reveal reveal-delay-2">
-          <div class="feature-icon"><svg viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg></div>
-          <h3 class="feature-title">Configuración de sede</h3>
-          <p class="feature-desc">Geocodificación vía Nominatim (OpenStreetMap), coordenadas manuales con validación y ajuste del radio de geovallado para validar fichajes presenciales.</p>
-        </div>
+        <div class="feature-card reveal"><div class="feature-icon"><svg viewBox="0 0 24 24"><path d="M12 12c2.7 0 4.8-2.1 4.8-4.8S14.7 2.4 12 2.4 7.2 4.5 7.2 7.2 9.3 12 12 12zm0 2.4c-3.2 0-9.6 1.6-9.6 4.8v2.4h19.2v-2.4c0-3.2-6.4-4.8-9.6-4.8z"/></svg></div><h3 class="feature-title">Gestión de empleados</h3><p class="feature-desc">Directorio con paginación, búsqueda y filtros. Alta con contraseña generada automáticamente, baja programada, readmisión y restablecimiento de credenciales.</p></div>
+        <div class="feature-card reveal reveal-delay-1"><div class="feature-icon"><svg viewBox="0 0 24 24"><path d="M19 3h-1V1h-2v2H8V1H6v2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V8h14v11z"/></svg></div><h3 class="feature-title">Planificación de turnos</h3><p class="feature-desc">Catálogo de turnos con CRUD completo, soporte de turnos nocturnos y asignación visual en calendario mensual con edición y registro de cambios.</p></div>
+        <div class="feature-card reveal reveal-delay-2"><div class="feature-icon"><svg viewBox="0 0 24 24"><path d="M17 12h-5v5h5v-5zM16 1v2H8V1H6v2H5c-1.1 0-1.99.9-1.99 2L3 19c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2h-1V1h-2zm3 18H5V8h14v11z"/></svg></div><h3 class="feature-title">Gestión de ausencias</h3><p class="feature-desc">Bandeja de revisión con pestañas por estado. Aprueba o rechaza con observaciones y descarga los justificantes adjuntados por el empleado.</p></div>
+        <div class="feature-card reveal"><div class="feature-icon"><svg viewBox="0 0 24 24"><path d="M5 9.2h3V19H5zM10.6 5h2.8v14h-2.8zm5.6 8H19v6h-2.8z"/></svg></div><h3 class="feature-title">Dashboard y análisis</h3><p class="feature-desc">KPIs en tiempo real, gráfico de ausencias por estado, distribución por departamento y widget de top retrasos con alerta visual para supervisión inmediata.</p></div>
+        <div class="feature-card reveal reveal-delay-1"><div class="feature-icon"><svg viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-5 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z"/></svg></div><h3 class="feature-title">Reportes PDF</h3><p class="feature-desc">Informes de control horario detallados por día y resumidos por empleado. Previsualización en tabla y descarga con apertura automática en el visor del sistema.</p></div>
+        <div class="feature-card reveal reveal-delay-2"><div class="feature-icon"><svg viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg></div><h3 class="feature-title">Configuración de sede</h3><p class="feature-desc">Geocodificación vía Nominatim (OpenStreetMap), coordenadas manuales con validación y ajuste del radio de geovallado para validar fichajes presenciales.</p></div>
       </div>
     </div>
   </section>
@@ -271,34 +406,22 @@
       </div>
       <div class="install-grid reveal">
         <div class="install-card">
-          <div class="install-platform">
-            <svg viewBox="0 0 24 24"><path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.8-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z"/></svg>
-            macOS — .dmg
-          </div>
+          <div class="install-platform"><svg viewBox="0 0 24 24"><path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.8-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z"/></svg>macOS — .dmg</div>
           <ol class="install-steps">
             <li><div class="step-num">1</div><span>Descarga el archivo <code>.dmg</code> con el botón de arriba.</span></li>
             <li><div class="step-num">2</div><span>Abre el <code>.dmg</code> y arrastra <strong>GestorRH</strong> a la carpeta Aplicaciones.</span></li>
             <li><div class="step-num">3</div><span>Haz clic derecho sobre la app → <strong>Abrir</strong> para el primer arranque.</span></li>
           </ol>
-          <div class="install-note">
-            Si macOS bloquea la app ("Apple no puede verificar..."), abre Terminal y ejecuta:<br/>
-            <code>xattr -cr /Applications/GestorRH.app</code><br/>
-            Ocurre porque el instalador no está firmado con un certificado de Apple.
-          </div>
+          <div class="install-note">Si macOS bloquea la app, abre Terminal y ejecuta:<br/><code>xattr -cr /Applications/GestorRH.app</code></div>
         </div>
         <div class="install-card">
-          <div class="install-platform">
-            <svg viewBox="0 0 24 24"><path d="M3 12V6.75l6-1.32v6.57H3zm17 0V3l-8 1.43V12h8zM3 13h6v6.57l-6-1.32V13zm8 0h8v8L11 19.57V13z"/></svg>
-            Windows — .msi
-          </div>
+          <div class="install-platform"><svg viewBox="0 0 24 24"><path d="M3 12V6.75l6-1.32v6.57H3zm17 0V3l-8 1.43V12h8zM3 13h6v6.57l-6-1.32V13zm8 0h8v8L11 19.57V13z"/></svg>Windows — .msi</div>
           <ol class="install-steps">
             <li><div class="step-num">1</div><span>Descarga el archivo <code>.msi</code> con el botón de arriba.</span></li>
             <li><div class="step-num">2</div><span>Ejecuta el instalador y sigue el asistente.</span></li>
             <li><div class="step-num">3</div><span>Si aparece SmartScreen, pulsa <strong>Más información → Ejecutar de todas formas</strong>.</span></li>
           </ol>
-          <div class="install-note">
-            Si el antivirus bloquea la instalación, añade una excepción para el <code>.msi</code> o deshabilita temporalmente la protección en tiempo real. El instalador no está firmado con certificado de desarrollador.
-          </div>
+          <div class="install-note">El instalador no está firmado con certificado de desarrollador. Añade una excepción en el antivirus si es necesario.</div>
         </div>
       </div>
     </div>
@@ -327,7 +450,7 @@
     </div>
   </section>
 
-  <!-- CHANGELOG (colapsable) -->
+  <!-- CHANGELOG -->
   <section id="novedades">
     <div class="container">
       <div class="section-header reveal">
@@ -366,54 +489,39 @@
   <script src="../shared/nav.js"></script>
   <script>
     marked.setOptions({ breaks: true, gfm: true });
-    function md(text) { return marked.parse(text || ''); }
-
+    function md(t) { return marked.parse(t || ''); }
     let assets = { macos: null, windows: null };
-
-    async function triggerDownload(platform) {
-      const url = assets[platform];
-      if (!url) { window.open('https://github.com/GestorRH-Multiplataforma/GestorRH-Escritorio/releases/latest', '_blank'); return; }
-      window.open(url, '_blank');
+    async function triggerDownload(p) {
+      window.open(assets[p] || 'https://github.com/GestorRH-Multiplataforma/GestorRH-Escritorio/releases/latest', '_blank');
     }
-
     function toggleChangelog() {
       document.getElementById('cl-toggle').classList.toggle('open');
       document.getElementById('cl-panel').classList.toggle('open');
     }
-
     async function loadRelease() {
       try {
-        const res  = await fetch('https://api.github.com/repos/GestorRH-Multiplataforma/GestorRH-Escritorio/releases/latest');
+        const res = await fetch('https://api.github.com/repos/GestorRH-Multiplataforma/GestorRH-Escritorio/releases/latest');
         if (!res.ok) throw new Error();
         const data = await res.json();
         const version = data.tag_name || 'v1.0.0';
-        const date    = data.published_at ? new Date(data.published_at).toLocaleDateString('es-ES', { year:'numeric', month:'long', day:'numeric' }) : '';
-
-        const dmg = data.assets?.find(a => a.name.endsWith('.dmg'));
-        const msi = data.assets?.find(a => a.name.endsWith('.msi'));
-        assets.macos   = dmg?.browser_download_url || data.html_url;
-        assets.windows = msi?.browser_download_url || data.html_url;
-
-        ['ver-macos','ver-macos-cta'].forEach(id => { const el = document.getElementById(id); if(el) el.textContent = version; });
-        ['ver-windows','ver-windows-cta'].forEach(id => { const el = document.getElementById(id); if(el) el.textContent = version; });
-
-        /* Detectar plataforma y resaltar botón */
+        const date = data.published_at ? new Date(data.published_at).toLocaleDateString('es-ES',{year:'numeric',month:'long',day:'numeric'}) : '';
+        assets.macos   = data.assets?.find(a=>a.name.endsWith('.dmg'))?.browser_download_url || data.html_url;
+        assets.windows = data.assets?.find(a=>a.name.endsWith('.msi'))?.browser_download_url || data.html_url;
+        ['ver-macos','ver-macos-cta'].forEach(id=>{const el=document.getElementById(id);if(el)el.textContent=version;});
+        ['ver-windows','ver-windows-cta'].forEach(id=>{const el=document.getElementById(id);if(el)el.textContent=version;});
         const plat = GRH.detectPlatform();
-        if (plat === 'macos')   { document.getElementById('btn-macos')?.classList.add('detected');   document.getElementById('btn-macos-cta')?.classList.add('detected'); }
-        if (plat === 'windows') { document.getElementById('btn-windows')?.classList.add('detected'); document.getElementById('btn-windows-cta')?.classList.add('detected'); }
-
-        document.getElementById('cl-version').textContent     = version;
-        document.getElementById('cl-date').textContent        = date;
+        if(plat==='macos'){document.getElementById('btn-macos')?.classList.add('detected');document.getElementById('btn-macos-cta')?.classList.add('detected');}
+        if(plat==='windows'){document.getElementById('btn-windows')?.classList.add('detected');document.getElementById('btn-windows-cta')?.classList.add('detected');}
+        document.getElementById('cl-version').textContent = version;
+        document.getElementById('cl-date').textContent = date;
         document.getElementById('cl-toggle-label').textContent = 'Novedades en ' + version;
-        if (!data.prerelease) { document.getElementById('cl-badge').style.display = document.getElementById('cl-badge-toggle').style.display = 'inline-flex'; }
-        const raw = data.body || '';
-        const el = document.getElementById('cl-body');
-        el.innerHTML = raw ? md(raw) : '<p style="color:rgba(255,255,255,0.4)">Sin notas disponibles.</p>';
+        if(!data.prerelease){document.getElementById('cl-badge').style.display=document.getElementById('cl-badge-toggle').style.display='inline-flex';}
+        document.getElementById('cl-body').innerHTML = data.body ? md(data.body) : '<p style="color:rgba(255,255,255,0.4)">Sin notas disponibles.</p>';
         document.getElementById('grh-footer-version').textContent = 'Escritorio ' + version;
       } catch {
-        ['ver-macos','ver-macos-cta','ver-windows','ver-windows-cta'].forEach(id => { const el = document.getElementById(id); if(el) el.textContent = 'v1.0.0'; });
+        ['ver-macos','ver-macos-cta','ver-windows','ver-windows-cta'].forEach(id=>{const el=document.getElementById(id);if(el)el.textContent='v1.0.0';});
         document.getElementById('cl-toggle-label').textContent = 'Novedades en v1.0.0';
-        document.getElementById('cl-badge').style.display = document.getElementById('cl-badge-toggle').style.display = 'inline-flex';
+        document.getElementById('cl-badge').style.display=document.getElementById('cl-badge-toggle').style.display='inline-flex';
         document.getElementById('cl-version').textContent = 'v1.0.0';
         document.getElementById('cl-body').innerHTML = '<p>Primera versión estable. Incluye gestión de empleados, turnos, ausencias, dashboard, reportes PDF e instaladores nativos para macOS y Windows.</p>';
       }
